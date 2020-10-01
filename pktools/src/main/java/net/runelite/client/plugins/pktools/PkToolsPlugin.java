@@ -1,14 +1,30 @@
 package net.runelite.client.plugins.pktools;
 
 import com.google.inject.Provides;
+import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
-
-import net.runelite.api.*;
+import net.runelite.api.Actor;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.MenuOpcode;
+import net.runelite.api.Player;
+import net.runelite.api.PlayerAppearance;
 import net.runelite.api.Point;
-import net.runelite.api.events.*;
+import net.runelite.api.Prayer;
+import net.runelite.api.Skill;
+import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.InteractingChanged;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.kit.KitType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -20,16 +36,9 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.PluginType;
 import net.runelite.client.plugins.pktools.ScriptCommand.ScriptCommand;
 import net.runelite.client.ui.overlay.OverlayManager;
-
+import net.runelite.client.util.WeaponMap;
+import net.runelite.client.util.WeaponStyle;
 import org.pf4j.Extension;
-
-import javax.inject.Inject;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 
 @Extension
 @PluginDescriptor(
@@ -201,8 +210,26 @@ public class PkToolsPlugin extends Plugin
 		}
 	}
 
-	public void activatePrayer(WidgetInfo widgetInfo)
+	public void activatePrayer(Prayer prayer)
 	{
+		if (prayer == null)
+		{
+			return;
+		}
+
+		//check if prayer is already active this tick
+		if (client.isPrayerActive(prayer))
+		{
+			return;
+		}
+
+		WidgetInfo widgetInfo = prayer.getWidgetInfo();
+
+		if (widgetInfo == null)
+		{
+			return;
+		}
+
 		Widget prayer_widget = client.getWidget(widgetInfo);
 
 		if (prayer_widget == null)
@@ -233,15 +260,6 @@ public class PkToolsPlugin extends Plugin
 
 		try
 		{
-			boolean PROTECT_MELEE = client.getVar(Prayer.PROTECT_FROM_MELEE.getVarbit()) != 0;
-			boolean PROTECT_RANGED = client.getVar(Prayer.PROTECT_FROM_MISSILES.getVarbit()) != 0;
-			boolean PROTECT_MAGIC = client.getVar(Prayer.PROTECT_FROM_MAGIC.getVarbit()) != 0;
-
-			if (client.getBoostedSkillLevel(Skill.PRAYER) <= 0)
-			{
-				return;
-			}
-
 			if (lastEnemy == null)
 			{
 				return;
@@ -254,24 +272,26 @@ public class PkToolsPlugin extends Plugin
 				return;
 			}
 
-			int WEAPON_INT = lastEnemyAppearance.getEquipmentId(KitType.WEAPON);
+			WeaponStyle weaponStyle = WeaponMap.StyleMap.getOrDefault(lastEnemyAppearance.getEquipmentId(KitType.WEAPON), null);
 
-			if (WEAPON_INT <= 0)
+			if (weaponStyle == null)
 			{
 				return;
 			}
 
-			if (Arrays.stream(PkToolsOverlay.MELEE_LIST).anyMatch(x -> x == WEAPON_INT) && !PROTECT_MELEE)
+			switch (weaponStyle)
 			{
-				activatePrayer(WidgetInfo.PRAYER_PROTECT_FROM_MELEE);
-			}
-			else if (Arrays.stream(PkToolsOverlay.RANGED_LIST).anyMatch(x -> x == WEAPON_INT) && !PROTECT_RANGED)
-			{
-				activatePrayer(WidgetInfo.PRAYER_PROTECT_FROM_MISSILES);
-			}
-			else if (Arrays.stream(PkToolsOverlay.MAGIC_LIST).anyMatch(x -> x == WEAPON_INT) && !PROTECT_MAGIC)
-			{
-				activatePrayer(WidgetInfo.PRAYER_PROTECT_FROM_MAGIC);
+				case MELEE:
+					activatePrayer(Prayer.PROTECT_FROM_MELEE);
+					break;
+				case RANGE:
+					activatePrayer(Prayer.PROTECT_FROM_MISSILES);
+					break;
+				case MAGIC:
+					activatePrayer(Prayer.PROTECT_FROM_MAGIC);
+					break;
+				default:
+					break;
 			}
 		}
 		catch (Exception e)
