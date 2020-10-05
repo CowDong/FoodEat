@@ -57,13 +57,18 @@ public interface ItemCombinerConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "clickDelay",
-		name = "Click Delay",
-		description = "The keybind to drop the items",
-		position = 4
+			keyName = "waitMin",
+			name = "Delay Min",
+			description = "Minimum time to delay",
+			position = 4
 	)
-	default int clickDelay()
-	{
-		return 30;
-	}
+	default int waitMin() { return 5; }
+
+	@ConfigItem(
+			keyName = "waitMax",
+			name = "Delay Max",
+			description = "Maximum time to delay",
+			position = 5
+	)
+	default int waitMax() { return 30; }
 }
