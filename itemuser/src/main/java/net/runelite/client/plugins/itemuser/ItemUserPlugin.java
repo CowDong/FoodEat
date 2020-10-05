@@ -143,7 +143,7 @@ public class ItemUserPlugin extends Plugin
 	{
 		iterating = true;
 
-		if (items == null || items.isEmpty())
+		if (items.isEmpty())
 		{
 			return;
 		}
@@ -161,9 +161,18 @@ public class ItemUserPlugin extends Plugin
 		for (WidgetItem item : items)
 		{
 			entryList.add(new MenuEntry("Use", "<col=ff9040>" + itemManager.getItemDefinition(item.getId()).getName(), item.getId(), MenuOpcode.ITEM_USE.getId(), item.getIndex(), WidgetInfo.INVENTORY.getId(), false));
-			entryList.add(new MenuEntry("Use", "<col=ff9040>" + itemManager.getItemDefinition(item.getId()).getName() + "<col=ffffff> -> <col=ffff>" + client.getObjectDefinition(object.getId()).getName(), object.getId(), MenuOpcode.ITEM_USE_ON_GAME_OBJECT.getId(), object.getSceneMinLocation().getX(), object.getSceneMinLocation().getY(), false));
 
 			int randDelay = r.nextInt(config.waitMax() - config.waitMin()) + config.waitMin();
+
+			for (int i = 0; i < randDelay; i++)
+			{
+				entryList.add(waitEntry);
+			}
+
+			entryList.add(new MenuEntry("Use", "<col=ff9040>" + itemManager.getItemDefinition(item.getId()).getName() + "<col=ffffff> -> <col=ffff>" + client.getObjectDefinition(object.getId()).getName(), object.getId(), MenuOpcode.ITEM_USE_ON_GAME_OBJECT.getId(), object.getSceneMinLocation().getX(), object.getSceneMinLocation().getY(), false));
+
+			randDelay = r.nextInt(config.waitMax() - config.waitMin()) + config.waitMin();
+
 			for (int i = 0; i < randDelay; i++)
 			{
 				entryList.add(waitEntry);
