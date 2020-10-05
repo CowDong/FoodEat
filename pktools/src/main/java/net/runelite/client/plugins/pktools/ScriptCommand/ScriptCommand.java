@@ -471,8 +471,11 @@ class ClickEnemyCommand implements ScriptCommand
 	{
 		try
 		{
-			plugin.entryList.add(new MenuEntry("", "", plugin.lastEnemy.getPlayerId(), client.isSpellSelected() ? MenuOpcode.SPELL_CAST_ON_PLAYER.getId() : MenuOpcode.PLAYER_SECOND_OPTION.getId(), 0, 0, false));
-			click(client);
+			if (plugin.lastEnemy != null)
+			{
+				plugin.entryList.add(new MenuEntry("", "", plugin.lastEnemy.getPlayerId(), client.isSpellSelected() ? MenuOpcode.SPELL_CAST_ON_PLAYER.getId() : MenuOpcode.PLAYER_SECOND_OPTION.getId(), 0, 0, false));
+				click(client);
+			}
 		}
 		catch (Exception e)
 		{
