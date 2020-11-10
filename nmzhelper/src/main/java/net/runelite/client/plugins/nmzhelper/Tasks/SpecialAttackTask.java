@@ -14,7 +14,7 @@ public class SpecialAttackTask extends Task
 	public boolean validate()
 	{
 		//option is disabled in config
-		if (config.useSpecialAttack() == false)
+		if (!config.useSpecialAttack())
 		{
 			return false;
 		}

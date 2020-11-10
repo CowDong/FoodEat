@@ -34,13 +34,20 @@ public class DominicDreamTask extends Task
 		if (MiscUtils.isInNightmareZone(client))
 			return false;
 
+		/*debugMessage.removeLast();
+		debugMessage.addLast(getClass().getName() + ":\thas absorptions");
+
 		//has absorptions
 		if (getAbsorptionDoseCount() >= config.absorptionDoses())
 			return false;
 
+		debugMessage.removeLast();
+		debugMessage.addLast(getClass().getName() + ":\thas overloads");
+
 		//has overloads
 		if (getOverloadDoseCount() >= config.overloadDoses())
-			return false;
+			return false;*/
+
 
 		//DIALOG_OPTION_OPTION1[0] == Which dream would you like to experience?
 		Widget dialogOption1Widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
@@ -52,7 +59,12 @@ public class DominicDreamTask extends Task
 
 		Widget dialogNpcContinueWidget = client.getWidget(WidgetInfo.DIALOG_NPC_CONTINUE);
 
-		return dialogNpcContinueWidget == null || dialogNpcContinueWidget.isHidden();
+		if (dialogNpcContinueWidget != null && !dialogNpcContinueWidget.isHidden())
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
