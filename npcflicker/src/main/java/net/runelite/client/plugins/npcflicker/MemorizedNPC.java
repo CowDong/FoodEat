@@ -1,32 +1,25 @@
 package net.runelite.client.plugins.npcflicker;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Actor;
 import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldArea;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
+@Setter
 public class MemorizedNPC
 {
-	private NPC npc;
-	private int npcIndex;
-	private String npcName;
-	private int attackSpeed;
-	@Setter(AccessLevel.PACKAGE)
-	private int combatTimerEnd;
-	@Setter(AccessLevel.PACKAGE)
-	private int timeLeft;
-	@Setter(AccessLevel.PACKAGE)
-	private int flinchTimerEnd;
-	@Setter(AccessLevel.PACKAGE)
-	private Status status;
-	@Setter(AccessLevel.PACKAGE)
-	private WorldArea lastnpcarea;
-	@Setter(AccessLevel.PACKAGE)
-	private Actor lastinteracted;
+	NPC npc;
+	int npcIndex;
+	String npcName;
+	int attackSpeed;
+	int combatTimerEnd;
+	int timeLeft;
+	int flinchTimerEnd;
+	Status status;
+	WorldArea lastnpcarea;
+	Actor lastinteracted;
 
 	MemorizedNPC(final NPC npc, final int attackSpeed, final WorldArea worldArea)
 	{
@@ -42,8 +35,6 @@ public class MemorizedNPC
 		this.lastinteracted = null;
 	}
 
-	@Getter(AccessLevel.PACKAGE)
-	@AllArgsConstructor
 	enum Status
 	{
 		FLINCHING("Flinching"),
@@ -52,5 +43,10 @@ public class MemorizedNPC
 		OUT_OF_COMBAT("Out of Combat");
 
 		private String name;
+
+		Status(String name)
+		{
+			this.name = name;
+		}
 	}
 }

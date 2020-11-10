@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Inject;
-import lombok.AccessLevel;
-import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.GraphicID;
@@ -16,6 +14,7 @@ import net.runelite.api.Hitsplat;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.MenuOpcode;
 import net.runelite.api.NPC;
+import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
@@ -56,7 +55,6 @@ public class NpcFlickerPlugin extends Plugin
 	@Inject
 	private NpcFlickerConfig config;
 
-	@Getter(AccessLevel.PACKAGE)
 	private final Set<MemorizedNPC> memorizedNPCs = new HashSet<>();
 
 	private WorldArea lastPlayerLocation;
@@ -118,7 +116,14 @@ public class NpcFlickerPlugin extends Plugin
 	@Subscribe
 	private void onHitsplatApplied(HitsplatApplied event)
 	{
-		if (event.getActor().getInteracting() != client.getLocalPlayer())
+		Player localPlayer = client.getLocalPlayer();
+
+		if (localPlayer == null)
+		{
+			return;
+		}
+
+		if (event.getActor().getInteracting() != localPlayer)
 		{
 			return;
 		}
@@ -179,6 +184,13 @@ public class NpcFlickerPlugin extends Plugin
 
 	private void checkStatus()
 	{
+		Player localPlayer = client.getLocalPlayer();
+
+		if (localPlayer == null)
+		{
+			return;
+		}
+
 		if (lastPlayerLocation == null)
 		{
 			return;
@@ -187,11 +199,13 @@ public class NpcFlickerPlugin extends Plugin
 		{
 			final double CombatTime = npc.getCombatTimerEnd() - client.getTickCount();
 			final double FlinchTime = npc.getFlinchTimerEnd() - client.getTickCount();
+
 			if (npc.getNpc().getWorldArea() == null)
 			{
 				continue;
 			}
-			if (npc.getNpc().getInteracting() == client.getLocalPlayer())
+
+			if (npc.getNpc().getInteracting() == localPlayer)
 			{
 				//Checks: will the NPC attack this tick?
 				if (((npc.getNpc().getWorldArea().canMelee(client, lastPlayerLocation) && config.getRange() == 1) //Separate mechanics for meleerange-only NPC's because they have extra collisiondata checks (fences etc.) and can't attack diagonally
@@ -203,6 +217,7 @@ public class NpcFlickerPlugin extends Plugin
 					npc.setStatus(MemorizedNPC.Status.IN_COMBAT_DELAY);
 					npc.setLastnpcarea(npc.getNpc().getWorldArea());
 					npc.setLastinteracted(npc.getNpc().getInteracting());
+
 					if (config.isCustomAttSpeed())
 					{
 						npc.setCombatTimerEnd(client.getTickCount() + config.getCustomAttSpeed() + 8);
@@ -211,9 +226,11 @@ public class NpcFlickerPlugin extends Plugin
 					{
 						npc.setCombatTimerEnd(client.getTickCount() + npc.getAttackSpeed() + 8);
 					}
+
 					continue;
 				}
 			}
+
 			switch (npc.getStatus())
 			{
 				case IN_COMBAT:
@@ -235,6 +252,7 @@ public class NpcFlickerPlugin extends Plugin
 						npc.setCombatTimerEnd(client.getTickCount() + 8);
 					}
 			}
+
 			npc.setLastnpcarea(npc.getNpc().getWorldArea());
 			npc.setLastinteracted(npc.getNpc().getInteracting());
 		}
@@ -244,30 +262,30 @@ public class NpcFlickerPlugin extends Plugin
 	private void onGameTick(GameTick event)
 	{
 		checkStatus();
-		lastPlayerLocation = client.getLocalPlayer().getWorldArea();
 
-		for (MemorizedNPC npc : memorizedNPCs)
+		Player localPlayer = client.getLocalPlayer();
+
+		if (localPlayer == null)
 		{
-			if (npc.getNpc().getInteracting() == client.getLocalPlayer() || client.getLocalPlayer().getInteracting() == npc.getNpc())
-			{
-				if (npc.getTimeLeft() == 2)
-				{
-					activatePrayer(Prayer.PROTECT_FROM_MELEE);
-				}
-				else
-				{
-					deactivatePrayer(Prayer.PROTECT_FROM_MELEE);
-				}
-			}
+			return;
 		}
+
+		lastPlayerLocation = localPlayer.getWorldArea();
 	}
 
 	@Subscribe
 	private void onClientTick(ClientTick event)
 	{
+		Player localPlayer = client.getLocalPlayer();
+
+		if (localPlayer == null)
+		{
+			return;
+		}
+
 		for (MemorizedNPC npc : memorizedNPCs)
 		{
-			if (npc.getNpc().getInteracting() == client.getLocalPlayer() || client.getLocalPlayer().getInteracting() == npc.getNpc())
+			if (npc.getNpc().getInteracting() == localPlayer || localPlayer.getInteracting() == npc.getNpc())
 			{
 				switch (npc.getStatus())
 				{
@@ -284,6 +302,16 @@ public class NpcFlickerPlugin extends Plugin
 					default:
 						npc.setTimeLeft(0);
 						break;
+				}
+
+				if (npc.getTimeLeft() == 1)
+				{
+					activatePrayer(getPrayerFromNpcId(npc.getNpc().getId()));
+					return;
+				}
+				else
+				{
+					deactivatePrayer(getPrayerFromNpcId(npc.getNpc().getId()));
 				}
 			}
 		}
@@ -363,6 +391,20 @@ public class NpcFlickerPlugin extends Plugin
 
 		entry = new MenuEntry("Deactivate", prayer_widget.getName(), 1, MenuOpcode.CC_OP.getId(), prayer_widget.getItemId(), prayer_widget.getId(), false);
 		click();
+	}
+
+	public Prayer getPrayerFromNpcId(int npcId)
+	{
+		if (!config.magicNpcs().isEmpty() && Arrays.stream(config.magicNpcs().split(",")).anyMatch(configId -> Integer.parseInt(configId) == npcId))
+		{
+			return Prayer.PROTECT_FROM_MAGIC;
+		}
+		else if (!config.rangedNpcs().isEmpty() && Arrays.stream(config.rangedNpcs().split(",")).anyMatch(configId -> Integer.parseInt(configId) == npcId))
+		{
+			return Prayer.PROTECT_FROM_MISSILES;
+		}
+
+		return Prayer.PROTECT_FROM_MELEE;
 	}
 
 	public void click()

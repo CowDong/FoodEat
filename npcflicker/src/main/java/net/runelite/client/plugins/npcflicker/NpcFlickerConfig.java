@@ -55,8 +55,16 @@ public interface NpcFlickerConfig extends Config
 	@ConfigItem(
 		keyName = "magicNpcs",
 		name = "Magic NPCs",
-		description = "",
+		description = "NPC ID's separated by comma",
 		position = 4
 	)
 	default String magicNpcs() { return ""; }
+
+	@ConfigItem(
+		keyName = "rangedNpcs",
+		name = "Ranged NPCs",
+		description = "NPC ID's separated by comma",
+		position = 5
+	)
+	default String rangedNpcs() { return ""; }
 }
