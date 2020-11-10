@@ -1,10 +1,12 @@
 package net.runelite.client.plugins.eventdebugger;
 
 import com.google.inject.Provides;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -12,8 +14,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.PluginType;
 import org.pf4j.Extension;
-
-import javax.inject.Inject;
 
 @Extension
 @PluginDescriptor(
@@ -106,5 +106,17 @@ public class EventDebuggerPlugin extends Plugin
 		log.info("\tForceLeftClick:\t" + event.isForceLeftClick());
 		log.info("\tModified:\t" + event.isModified());
 
+	}
+
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event) {
+		log.info("MenuOptionClicked:");
+		log.info("\tOption:\t" + event.getOption());
+		log.info("\tTarget:\t" + event.getTarget());
+		log.info("\tIdentifier:\t" + event.getIdentifier());
+		log.info("\tOpcode:\t" + event.getOpcode());
+		log.info("\tParam0:\t" + event.getParam0());
+		log.info("\tParam1:\t" + event.getParam1());
+		log.info("\tForceLeftClick:\t" + event.isForceLeftClick());
 	}
 }
