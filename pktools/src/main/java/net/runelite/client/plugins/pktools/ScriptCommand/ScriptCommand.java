@@ -54,7 +54,7 @@ public interface ScriptCommand
 				return;
 			}
 
-			plugin.entryList.add(new MenuEntry(spell_widget.getTargetVerb(), spell_widget.getName(), 0, MenuOpcode.CC_OP.getId(), spell_widget.getItemId(), spell_widget.getId(), false));
+			plugin.entryList.add(new MenuEntry(spell_widget.getTargetVerb(), spell_widget.getName(), 1, MenuOpcode.CC_OP.getId(), spell_widget.getItemId(), spell_widget.getId(), false));
 			click(client);
 		}
 		catch (Exception e)
