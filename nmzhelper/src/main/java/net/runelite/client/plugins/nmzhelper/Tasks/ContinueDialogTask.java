@@ -1,15 +1,23 @@
 package net.runelite.client.plugins.nmzhelper.Tasks;
 
+import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.MenuOpcode;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
+import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
+import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class ContinueDialogTask extends Task
 {
+	public ContinueDialogTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
+	{
+		super(plugin, client, config);
+	}
+
 	@Override
 	public boolean validate()
 	{

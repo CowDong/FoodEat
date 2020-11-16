@@ -9,21 +9,32 @@ import net.runelite.client.config.ConfigItem;
 public interface NMZHelperConfig extends Config
 {
 	@ConfigItem(
-		keyName = "absorptionThreshold",
-		name = "Absorption Threshold",
+		keyName = "absorptionThresholdMin",
+		name = "Absorption Threshold (min)",
 		description = "The amount of absorption points to maintain.",
 		position = 1
 	)
-	default int absorptionThreshold()
+	default int absorptionThresholdMin()
 	{
 		return 200;
+	}
+
+	@ConfigItem(
+		keyName = "absorptionThresholdMax",
+		name = "Absorption Threshold (max)",
+		description = "The amount of absorption points to maintain.",
+		position = 2
+	)
+	default int absorptionThresholdMax()
+	{
+		return 300;
 	}
 
 	@ConfigItem(
 		keyName = "overloadDoses",
 		name = "Overload Doses",
 		description = "The amount of doses of overload to withdraw.",
-		position = 2
+		position = 3
 	)
 	default int overloadDoses() { return 20; }
 
@@ -31,7 +42,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "absorptionDoses",
 		name = "Absorption Doses",
 		description = "The amount of doses of absorption to withdraw.",
-		position = 3
+		position = 4
 	)
 	default int absorptionDoses() { return 88; }
 
@@ -39,7 +50,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "useSpecialAttack",
 		name = "Use Special Attack",
 		description = "Whether to use special attack or not",
-		position = 4
+		position = 5
 	)
 	default boolean useSpecialAttack() { return false; }
 
@@ -47,7 +58,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "specialAttackValue",
 		name = "Special Attack Value",
 		description = "The value to use special attack at",
-		position = 5,
+		position = 6,
 		hidden = true,
 		unhide = "useSpecialAttack"
 	)
@@ -57,7 +68,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "powerSurge",
 		name = "Power Surge?",
 		description = "Will activate power surge if one spawns on screen.",
-		position = 6
+		position = 7
 	)
 	default boolean powerSurge() { return false; }
 
@@ -65,7 +76,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "autoRelog",
 		name = "Auto Re-Log",
 		description = "Log back in after 6 hour logout?",
-		position = 7
+		position = 8
 	)
 	default boolean autoRelog() { return false; }
 
@@ -74,7 +85,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "email",
 		name = "Login Email",
 		description = "email",
-		position = 8
+		position = 9
 	)
 	default String email() { return ""; }
 
@@ -83,7 +94,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "password",
 		name = "Password",
 		description = "password",
-		position = 9,
+		position = 10,
 		secret = true
 	)
 	default String password() { return ""; }
@@ -91,7 +102,7 @@ public interface NMZHelperConfig extends Config
 	@ConfigItem(keyName = "startButton",
 		name = "Start",
 		description = "",
-		position = 10
+		position = 11
 	)
 	default Button startButton() { return new Button(); }
 
@@ -99,7 +110,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "stopButton",
 		name = "Stop",
 		description = "",
-		position = 11
+		position = 12
 	)
 	default Button stopButton() { return new Button(); }
 }

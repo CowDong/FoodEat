@@ -11,7 +11,12 @@ import net.runelite.api.events.MenuOptionClicked;
 
 public abstract class Task
 {
-	public Task() { }
+	public Task(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
+	{
+		this.plugin = plugin;
+		this.client = client;
+		this.config = config;
+	}
 
 	@Inject
 	public NMZHelperPlugin plugin;

@@ -3,6 +3,7 @@ package net.runelite.client.plugins.nmzhelper.Tasks;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.ScriptID;
 import net.runelite.api.VarClientInt;
@@ -12,10 +13,17 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
+import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
+import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class WithdrawAbsorptionTask extends Task
 {
+	public WithdrawAbsorptionTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
+	{
+		super(plugin, client, config);
+	}
+
 	@Override
 	public boolean validate()
 	{

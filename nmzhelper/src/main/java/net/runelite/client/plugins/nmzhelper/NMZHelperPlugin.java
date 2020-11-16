@@ -1,6 +1,8 @@
 package net.runelite.client.plugins.nmzhelper;
 
 import com.google.inject.Provides;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.ChatMessageType;
@@ -24,7 +26,25 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.PluginType;
-import net.runelite.client.plugins.nmzhelper.Tasks.*;
+import net.runelite.client.plugins.nmzhelper.Tasks.AbsorptionTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.AcceptDreamTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.BenefitsTabTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.BuyAbsorptionsTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.BuyOverloadsTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.ContinueDialogTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.DominicDialogue1Task;
+import net.runelite.client.plugins.nmzhelper.Tasks.DominicDialogue2Task;
+import net.runelite.client.plugins.nmzhelper.Tasks.DominicDreamTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.DrinkPotionTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.OpenAbsorptionsBarrelTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.OpenOverloadsBarrel;
+import net.runelite.client.plugins.nmzhelper.Tasks.OverloadTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.PowerSurgeTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.RockCakeTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.SearchRewardsChestTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.SpecialAttackTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.WithdrawAbsorptionTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.WithdrawOverloadTask;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.pf4j.Extension;
 
@@ -44,6 +64,38 @@ public class NMZHelperPlugin extends Plugin
 		absorptions - 3954 (doses in storage)
 		overloads - 3953 (doses in storage)
 	 */
+
+	static List<Class<?>> taskClassList = new ArrayList<>();
+
+	static
+	{
+		taskClassList.add(SpecialAttackTask.class);
+		taskClassList.add(OverloadTask.class);
+		taskClassList.add(AbsorptionTask.class);
+		taskClassList.add(RockCakeTask.class);
+		taskClassList.add(PowerSurgeTask.class);
+
+		//--------------------------
+		taskClassList.add(SearchRewardsChestTask.class);
+		taskClassList.add(BenefitsTabTask.class);
+		taskClassList.add(BuyAbsorptionsTask.class);
+		taskClassList.add(BuyOverloadsTask.class);
+		//--------------------------
+
+		taskClassList.add(WithdrawAbsorptionTask.class);
+		taskClassList.add(WithdrawOverloadTask.class);
+		taskClassList.add(OpenAbsorptionsBarrelTask.class);
+		taskClassList.add(OpenOverloadsBarrel.class);
+
+		taskClassList.add(DominicDreamTask.class);
+		taskClassList.add(DominicDialogue1Task.class);
+		taskClassList.add(DominicDialogue2Task.class);
+
+		taskClassList.add(ContinueDialogTask.class);
+
+		taskClassList.add(DrinkPotionTask.class);
+		taskClassList.add(AcceptDreamTask.class);
+	}
 
 	@Inject
 	private Client client;
@@ -70,7 +122,7 @@ public class NMZHelperPlugin extends Plugin
 
 	public String status = "initializing...";
 
-	private TaskSet tasks = new TaskSet();
+	private final TaskSet tasks = new TaskSet();
 
 	public static int rockCakeDelay = 0;
 
@@ -81,35 +133,7 @@ public class NMZHelperPlugin extends Plugin
 		overlayManager.add(overlay);
 		status = "initializing...";
 		tasks.clear();
-		tasks.addAll(this, client, config,
-			//loginTask,
-			new SpecialAttackTask(),
-			new OverloadTask(),
-			new AbsorptionTask(),
-			new RockCakeTask(),
-			new PowerSurgeTask(),
-
-			//--------------------------
-			new SearchRewardsChestTask(),
-			new BenefitsTabTask(),
-			new BuyAbsorptionsTask(),
-			new BuyOverloadsTask(),
-			//--------------------------
-
-			new WithdrawAbsorptionTask(),
-			new WithdrawOverloadTask(),
-			new OpenAbsorptionsBarrelTask(),
-			new OpenOverloadsBarrel(),
-
-			new DominicDreamTask(),
-			new DominicDialogue1Task(),
-			new DominicDialogue2Task(),
-
-			new ContinueDialogTask(),
-
-			new DrinkPotionTask(),
-			new AcceptDreamTask()
-		);
+		tasks.addAll(this, client, config, taskClassList);
 	}
 
 	@Override

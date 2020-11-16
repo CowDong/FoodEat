@@ -2,19 +2,33 @@ package net.runelite.client.plugins.nmzhelper.Tasks;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
+import net.runelite.api.Client;
 import net.runelite.api.ItemID;
-import net.runelite.api.QueryResults;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
+import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
+import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class AbsorptionTask extends Task
 {
+	private final Random r = new Random();
+
+	//r.nextInt(config.absorptionThresholdMax() - config.absorptionThresholdMin()) + config.absorptionThresholdMin()
+
+	int nextAbsorptionValue = r.nextInt(config.absorptionThresholdMax() - config.absorptionThresholdMin()) + config.absorptionThresholdMin();
+
+	public AbsorptionTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
+	{
+		super(plugin, client, config);
+	}
+
 	@Override
 	public boolean validate()
 	{
@@ -41,7 +55,7 @@ public class AbsorptionTask extends Task
 			return false;
 
 		//already met the absorption point threshold
-		return client.getVar(Varbits.NMZ_ABSORPTION) < config.absorptionThreshold();
+		return client.getVar(Varbits.NMZ_ABSORPTION) < nextAbsorptionValue;
 	}
 
 	@Override
@@ -66,7 +80,7 @@ public class AbsorptionTask extends Task
 				ItemID.ABSORPTION_3, ItemID.ABSORPTION_4).contains(item.getId()))
 			.collect(Collectors.toList());
 
-		if (items == null || items.isEmpty())
+		if (items.isEmpty())
 		{
 			return;
 		}
@@ -78,5 +92,7 @@ public class AbsorptionTask extends Task
 
 		entry = MiscUtils.getConsumableEntry("", item.getId(), item.getIndex());
 		click();
+
+		nextAbsorptionValue = r.nextInt(config.absorptionThresholdMax() - config.absorptionThresholdMin()) + config.absorptionThresholdMin();
 	}
 }
