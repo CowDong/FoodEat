@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.nmzhelper.Tasks;
 
+import java.util.Random;
 import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.MenuOpcode;
@@ -13,6 +14,10 @@ import net.runelite.client.plugins.nmzhelper.Task;
 
 public class SpecialAttackTask extends Task
 {
+	private final Random r = new Random();
+
+	int nextSpecialValue = r.nextInt(config.specialAttackMax() - config.specialAttackMin()) + config.specialAttackMin();
+
 	public SpecialAttackTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
 	{
 		super(plugin, client, config);
@@ -40,7 +45,7 @@ public class SpecialAttackTask extends Task
 		}
 
 		//value returns 1000 for 100% spec, 500 for 50%, etc
-		if (client.getVar(VarPlayer.SPECIAL_ATTACK_PERCENT) < config.specialAttackValue() * 10)
+		if (client.getVar(VarPlayer.SPECIAL_ATTACK_PERCENT) < nextSpecialValue * 10)
 		{
 			return false;
 		}
@@ -66,5 +71,7 @@ public class SpecialAttackTask extends Task
 	{
 		entry = new MenuEntry("Use <col=00ff00>Special Attack</col>", "", 1, MenuOpcode.CC_OP.getId(), -1, 38862884, false);
 		click();
+
+		nextSpecialValue = r.nextInt(config.specialAttackMax() - config.specialAttackMin()) + config.specialAttackMin();
 	}
 }

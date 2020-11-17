@@ -55,20 +55,30 @@ public interface NMZHelperConfig extends Config
 	default boolean useSpecialAttack() { return false; }
 
 	@ConfigItem(
-		keyName = "specialAttackValue",
-		name = "Special Attack Value",
-		description = "The value to use special attack at",
+		keyName = "specialAttackMin",
+		name = "Special Attack (min)",
+		description = "The minimum value to use special attack at",
 		position = 6,
 		hidden = true,
 		unhide = "useSpecialAttack"
 	)
-	default int specialAttackValue() { return 100; }
+	default int specialAttackMin() { return 99; }
+
+	@ConfigItem(
+		keyName = "specialAttackMax",
+		name = "Special Attack (max)",
+		description = "The maximum value to use special attack at",
+		position = 7,
+		hidden = true,
+		unhide = "useSpecialAttack"
+	)
+	default int specialAttackMax() { return 100; }
 
 	@ConfigItem(
 		keyName = "powerSurge",
 		name = "Power Surge?",
 		description = "Will activate power surge if one spawns on screen.",
-		position = 7
+		position = 8
 	)
 	default boolean powerSurge() { return false; }
 
@@ -76,7 +86,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "autoRelog",
 		name = "Auto Re-Log",
 		description = "Log back in after 6 hour logout?",
-		position = 8
+		position = 9
 	)
 	default boolean autoRelog() { return false; }
 
@@ -85,7 +95,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "email",
 		name = "Login Email",
 		description = "email",
-		position = 9
+		position = 10
 	)
 	default String email() { return ""; }
 
@@ -94,7 +104,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "password",
 		name = "Password",
 		description = "password",
-		position = 10,
+		position = 11,
 		secret = true
 	)
 	default String password() { return ""; }
@@ -102,7 +112,7 @@ public interface NMZHelperConfig extends Config
 	@ConfigItem(keyName = "startButton",
 		name = "Start",
 		description = "",
-		position = 11
+		position = 12
 	)
 	default Button startButton() { return new Button(); }
 
@@ -110,7 +120,7 @@ public interface NMZHelperConfig extends Config
 		keyName = "stopButton",
 		name = "Stop",
 		description = "",
-		position = 12
+		position = 13
 	)
 	default Button stopButton() { return new Button(); }
 }

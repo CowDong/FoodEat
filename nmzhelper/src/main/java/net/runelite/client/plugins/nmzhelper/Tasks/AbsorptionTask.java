@@ -20,8 +20,6 @@ public class AbsorptionTask extends Task
 {
 	private final Random r = new Random();
 
-	//r.nextInt(config.absorptionThresholdMax() - config.absorptionThresholdMin()) + config.absorptionThresholdMin()
-
 	int nextAbsorptionValue = r.nextInt(config.absorptionThresholdMax() - config.absorptionThresholdMin()) + config.absorptionThresholdMin();
 
 	public AbsorptionTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
