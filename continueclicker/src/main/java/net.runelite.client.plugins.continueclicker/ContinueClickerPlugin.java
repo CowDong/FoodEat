@@ -43,7 +43,7 @@ public class ContinueClickerPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		Widget widget = client.getWidget(WidgetInfo.DIALOG_NPC_CONTINUE);
+		Widget widget = getContinueWidget();
 
 		if (widget == null || widget.isHidden())
 		{
@@ -52,6 +52,39 @@ public class ContinueClickerPlugin extends Plugin
 
 		entry = new MenuEntry("Continue", "", 0, MenuOpcode.WIDGET_TYPE_6.getId(), -1, widget.getId(), false);
 		click();
+	}
+
+	public Widget getContinueWidget()
+	{
+		Widget widget = client.getWidget(WidgetInfo.DIALOG_NPC_CONTINUE);
+
+		if (widget != null && !widget.isHidden())
+		{
+			return widget;
+		}
+
+		widget = client.getWidget(WidgetInfo.DIALOG_PLAYER_CONTINUE);
+
+		if (widget != null && !widget.isHidden())
+		{
+			return widget;
+		}
+
+		widget = client.getWidget(WidgetInfo.DIALOG2_SPRITE_CONTINUE);
+
+		if (widget != null && !widget.isHidden())
+		{
+			return widget;
+		}
+
+		widget = client.getWidget(WidgetInfo.DIALOG_NOTIFICATION_CONTINUE);
+
+		if (widget != null && !widget.isHidden())
+		{
+			return widget;
+		}
+
+		return null;
 	}
 
 	@Subscribe
