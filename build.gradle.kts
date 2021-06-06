@@ -26,20 +26,20 @@ subprojects {
         }
         jcenter()
         maven(url = "https://repo.runelite.net")
-        maven(url = "https://repo.openosrs.com/repository/maven")
+        //maven(url = "https://repo.openosrs.com/repository/maven")
         mavenLocal()
         mavenCentral()
-        exclusiveContent {
-            forRepository {
+        /*exclusiveContent {
+            /*forRepository {
                 maven {
                     url = uri("https://raw.githubusercontent.com/open-osrs/hosting/master")
                 }
-            }
-            filter {
+            }*/
+            /*filter {
                 includeModule("net.runelite", "fernflower")
                 includeModule("com.openosrs.rxrelay3", "rxrelay")
-            }
-        }
+            }*/
+        }*/
     }
     apply<JavaPlugin>()
     apply<JavaLibraryPlugin>()
@@ -88,7 +88,7 @@ subprojects {
             doLast {
                 copy {
                     from("./build/libs/")
-                    into(System.getProperty("user.home") + "/.runelite/externalmanager")
+                    into(System.getProperty("user.home") + "/.openosrs/plugins")
                 }
             }
         }

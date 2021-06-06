@@ -24,7 +24,7 @@
  */
 
 object ProjectVersions {
-    const val rlVersion = "4.0.0"
+    const val rlVersion = "4.8.0"
     const val apiVersion = "^1.0.0"
 }
 
@@ -34,8 +34,8 @@ object Libraries {
         const val guice = "4.2.2"
         const val lombok = "1.18.10"
         const val okhttp3 = "4.2.2"
-        const val pf4j = "3.2.0"
-        const val rxjava = "2.2.14"
+        const val pf4j = "3.6.0"
+        const val rxjava = "3.0.10"
     }
 
     const val apacheCommonsText = "org.apache.commons:commons-text:${Versions.apacheCommonsText}"
