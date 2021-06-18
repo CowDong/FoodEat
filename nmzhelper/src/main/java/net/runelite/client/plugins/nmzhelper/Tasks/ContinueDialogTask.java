@@ -25,7 +25,8 @@ public class ContinueDialogTask extends Task
 		if (MiscUtils.isInNightmareZone(client))
 			return false;
 
-		Widget widget = client.getWidget(WidgetInfo.DIALOG_NPC_CONTINUE);
+
+		Widget widget = client.getWidget(231, 3);
 
 		return widget != null && !widget.isHidden();
 	}
@@ -39,7 +40,7 @@ public class ContinueDialogTask extends Task
 	@Override
 	public void onGameTick(GameTick event)
 	{
-		Widget widget = client.getWidget(WidgetInfo.DIALOG_NPC_CONTINUE);
+		Widget widget = client.getWidget(231, 3);;
 
 		if (widget == null || widget.isHidden())
 		{

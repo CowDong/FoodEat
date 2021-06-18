@@ -65,7 +65,7 @@ public class DominicDreamTask extends Task
 			return false;
 		}
 
-		Widget dialogNpcContinueWidget = client.getWidget(WidgetInfo.DIALOG_NPC_CONTINUE);
+		Widget dialogNpcContinueWidget = client.getWidget(231, 3);;
 
 		if (dialogNpcContinueWidget != null && !dialogNpcContinueWidget.isHidden())
 		{
