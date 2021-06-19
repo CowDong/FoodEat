@@ -13,68 +13,59 @@ import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
-public class PowerSurgeTask extends Task
-{
-	public PowerSurgeTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
-	{
-		super(plugin, client, config);
-	}
+public class PowerSurgeTask extends Task {
+    public PowerSurgeTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
+        super(plugin, client, config);
+    }
 
-	@Override
-	public boolean validate()
-	{
-		if (!config.powerSurge())
-			return false;
+    @Override
+    public boolean validate() {
+        if (!config.powerSurge())
+            return false;
 
-		//in the nightmare zone
-		if (!MiscUtils.isInNightmareZone(client))
-			return false;
+        //in the nightmare zone
+        if (!MiscUtils.isInNightmareZone(client))
+            return false;
 
-		QueryResults<GameObject> results = new GameObjectQuery()
-			.idEquals(ObjectID.POWER_SURGE)
-			.result(client);
+        QueryResults<GameObject> results = new GameObjectQuery()
+                .idEquals(ObjectID.POWER_SURGE)
+                .result(client);
 
-		if (results == null || results.isEmpty())
-		{
-			return false;
-		}
+        if (results == null || results.isEmpty()) {
+            return false;
+        }
 
-		GameObject obj = results.first();
+        GameObject obj = results.first();
 
-		if (obj == null)
-		{
-			return false;
-		}
+        if (obj == null) {
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public String getTaskDescription()
-	{
-		return "Power Surge";
-	}
+    @Override
+    public String getTaskDescription() {
+        return "Power Surge";
+    }
 
-	@Override
-	public void onGameTick(GameTick event)
-	{
-		QueryResults<GameObject> results = new GameObjectQuery()
-			.idEquals(ObjectID.POWER_SURGE)
-			.result(client);
+    @Override
+    public void onGameTick(GameTick event) {
+        QueryResults<GameObject> results = new GameObjectQuery()
+                .idEquals(ObjectID.POWER_SURGE)
+                .result(client);
 
-		if (results == null || results.isEmpty())
-		{
-			return;
-		}
+        if (results == null || results.isEmpty()) {
+            return;
+        }
 
-		GameObject obj = results.first();
+        GameObject obj = results.first();
 
-		if (obj == null)
-		{
-			return;
-		}
+        if (obj == null) {
+            return;
+        }
 
-		entry = new MenuEntry("Activate", "<col=ffff>Power surge", ObjectID.POWER_SURGE, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY(), false);
-		click();
-	}
+        entry = new MenuEntry("Activate", "<col=ffff>Power surge", ObjectID.POWER_SURGE, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY(), false);
+        click();
+    }
 }

@@ -1,24 +1,21 @@
 package net.runelite.client.plugins.continueclicker;
 
-import java.awt.Dimension;
-import java.awt.event.MouseEvent;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import net.runelite.api.Client;
-import net.runelite.api.MenuEntry;
 import net.runelite.api.MenuAction;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import org.pf4j.Extension;
 
-import static net.runelite.api.widgets.WidgetInfo.SPELL_WIND_BLAST;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.awt.*;
+import java.awt.event.MouseEvent;
 
 @Singleton
 @Extension
@@ -32,7 +29,8 @@ public class ContinueClickerPlugin extends Plugin {
     @Inject
     public Client client;
 
-    public MenuEntry entry;
+    @Inject
+    public ClientThread clientThread;
 
     @Override
     protected void startUp() throws Exception {
@@ -47,8 +45,15 @@ public class ContinueClickerPlugin extends Plugin {
         Widget widget = getContinueWidget();
 
         if (widget != null && !widget.isHidden()) {
-            entry = new MenuEntry("Continue", "", widget.getType(), MenuAction.WIDGET_TYPE_6.getId(), -1, widget.getId(), false);
-            click();
+            Widget finalWidget1 = widget;
+            this.clientThread.invoke(() ->
+                    client.invokeMenuAction(
+                            "Continue",
+                            "",
+                            finalWidget1.getType(),
+                            MenuAction.WIDGET_TYPE_6.getId(),
+                            -1,
+                            finalWidget1.getId()));
             return;
         }
 
@@ -56,8 +61,14 @@ public class ContinueClickerPlugin extends Plugin {
         widget = client.getWidget(WidgetInfo.DIALOG_SPRITE);
 
         if (widget != null && !widget.isHidden()) {
-            entry = new MenuEntry("Continue", "", 1, MenuAction.CC_OP.getId(), 2, widget.getId(), false);
-            click();
+            Widget finalWidget = widget;
+            this.clientThread.invoke(() ->
+                    client.invokeMenuAction("Continue",
+                            "",
+                            1,
+                            MenuAction.CC_OP.getId(),
+                            2,
+                            finalWidget.getId()));
         }
     }
 
@@ -86,7 +97,7 @@ public class ContinueClickerPlugin extends Plugin {
             return widget;
         }
 
-        widget = client.getWidget(231, 3);;
+        widget = client.getWidget(231, 4);
 
         if (widget != null && !widget.isHidden()) {
             return widget;
@@ -111,34 +122,5 @@ public class ContinueClickerPlugin extends Plugin {
         }
 
         return null;
-    }
-
-    @Subscribe
-    public void onMenuOptionClicked(MenuOptionClicked event) {
-        if (entry != null) {
-            event.setMenuEntry(entry);
-        }
-
-        entry = null;
-    }
-
-    public void click() {
-        Point pos = client.getMouseCanvasPosition();
-
-        if (client.isStretchedEnabled()) {
-            final Dimension stretched = client.getStretchedDimensions();
-            final Dimension real = client.getRealDimensions();
-            final double width = (stretched.width / real.getWidth());
-            final double height = (stretched.height / real.getHeight());
-            final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-            client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-            client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-            client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-            return;
-        }
-
-        client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-        client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-        client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
     }
 }

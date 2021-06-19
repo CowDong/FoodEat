@@ -11,43 +11,44 @@ import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
-public class ContinueDialogTask extends Task
-{
-	public ContinueDialogTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config)
-	{
-		super(plugin, client, config);
-	}
+public class ContinueDialogTask extends Task {
+    public ContinueDialogTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
+        super(plugin, client, config);
+    }
 
-	@Override
-	public boolean validate()
-	{
-		//in the nightmare zone
-		if (MiscUtils.isInNightmareZone(client))
-			return false;
+    @Override
+    public boolean validate() {
+        //in the nightmare zone
+        if (MiscUtils.isInNightmareZone(client))
+            return false;
 
+        Widget widget = client.getWidget(231, 4);
 
-		Widget widget = client.getWidget(231, 3);
+        return widget != null && !widget.isHidden();
+    }
 
-		return widget != null && !widget.isHidden();
-	}
+    @Override
+    public String getTaskDescription() {
+        return "Continuing Dialog";
+    }
 
-	@Override
-	public String getTaskDescription()
-	{
-		return "Continuing Dialog";
-	}
+    @Override
+    public void onGameTick(GameTick event) {
+        Widget widget = client.getWidget(231, 4);
 
-	@Override
-	public void onGameTick(GameTick event)
-	{
-		Widget widget = client.getWidget(231, 3);;
+        if (widget == null || widget.isHidden()) {
+            return;
+        }
 
-		if (widget == null || widget.isHidden())
-		{
-			return;
-		}
+        client.invokeMenuAction(
+                "Continue",
+                "",
+                widget.getType(),
+                MenuAction.WIDGET_TYPE_6.getId(),
+                -1,
+                widget.getId());
 
-		entry = new MenuEntry("Continue", "", 0, MenuAction.WIDGET_TYPE_6.getId(), -1, widget.getId(), false);
-		click();
-	}
+        //entry = new MenuEntry("Continue", "", 0, MenuAction.WIDGET_TYPE_6.getId(), -1, widget.getId(), false);
+        //click();
+    }
 }
