@@ -23,6 +23,51 @@ public class StopConditionTask extends Task {
 
     @Override
     public boolean validate() {
+
+        QueryResults<WidgetItem> sawResults = new InventoryWidgetItemQuery()
+                .idEquals(ItemID.SAW, ItemID.CRYSTAL_SAW)
+                .result(client);
+
+        if (sawResults == null || sawResults.isEmpty()) {
+            return true;
+        }
+
+        WidgetItem sawWidget = sawResults.first();
+
+        if (sawWidget == null) {
+            return true;
+        }
+
+        QueryResults<WidgetItem> hammerResults = new InventoryWidgetItemQuery()
+                .idEquals(ItemID.HAMMER)
+                .result(client);
+
+        if (hammerResults == null || hammerResults.isEmpty()) {
+            return true;
+        }
+
+        WidgetItem hammerWidget = sawResults.first();
+
+        if (hammerWidget == null) {
+            return true;
+        }
+
+        for (int req : config.mode().getOtherReqs()) {
+            QueryResults<WidgetItem> reqResults = new InventoryWidgetItemQuery()
+                    .idEquals(req)
+                    .result(client);
+
+            if (reqResults == null || reqResults.isEmpty()) {
+                return true;
+            }
+
+            WidgetItem reqWidget = reqResults.first();
+
+            if (reqWidget == null) {
+                return true;
+            }
+        }
+
         QueryResults<WidgetItem> results = new InventoryWidgetItemQuery()
                 .idEquals(config.mode().getPlankId() + 1) //noted plank is plankId + 1
                 .result(client);
