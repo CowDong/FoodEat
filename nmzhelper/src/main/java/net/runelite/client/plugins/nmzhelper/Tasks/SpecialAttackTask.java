@@ -8,6 +8,7 @@ import net.runelite.api.MenuAction;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
 import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
@@ -18,8 +19,8 @@ public class SpecialAttackTask extends Task {
 
     int nextSpecialValue = r.nextInt(config.specialAttackMax() - config.specialAttackMin()) + config.specialAttackMin();
 
-    public SpecialAttackTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
-        super(plugin, client, config);
+    public SpecialAttackTask(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config) {
+        super(plugin, client, clientThread, config);
     }
 
     @Override

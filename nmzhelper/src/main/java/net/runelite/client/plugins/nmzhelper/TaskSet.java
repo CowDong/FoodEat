@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.runelite.api.Client;
+import net.runelite.client.callback.ClientThread;
 
 public class TaskSet {
     public List<Task> taskList = new ArrayList<>();
@@ -14,12 +15,12 @@ public class TaskSet {
         taskList.addAll(Arrays.asList(tasks));
     }
 
-    public void addAll(NMZHelperPlugin plugin, Client client, NMZHelperConfig config, List<Class<?>> taskClazzes) {
+    public void addAll(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config, List<Class<?>> taskClazzes) {
         for (Class<?> taskClass : taskClazzes) {
             try {
-                Constructor ctor = taskClass.getDeclaredConstructor(NMZHelperPlugin.class, Client.class, NMZHelperConfig.class);
+                Constructor<?> ctor = taskClass.getDeclaredConstructor(NMZHelperPlugin.class, Client.class, ClientThread.class, NMZHelperConfig.class);
                 ctor.setAccessible(true);
-                taskList.add((Task) ctor.newInstance(plugin, client, config));
+                taskList.add((Task) ctor.newInstance(plugin, client, clientThread, config));
             } catch (Exception e) {
                 e.printStackTrace();
             }

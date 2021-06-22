@@ -8,14 +8,15 @@ import net.runelite.api.ObjectID;
 import net.runelite.api.QueryResults;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.queries.GameObjectQuery;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
 import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class PowerSurgeTask extends Task {
-    public PowerSurgeTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
-        super(plugin, client, config);
+    public PowerSurgeTask(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config) {
+        super(plugin, client, clientThread, config);
     }
 
     @Override

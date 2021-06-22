@@ -4,13 +4,14 @@ import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class AcceptDreamTask extends Task {
-    public AcceptDreamTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
-        super(plugin, client, config);
+    public AcceptDreamTask(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config) {
+        super(plugin, client, clientThread, config);
     }
 
     @Override

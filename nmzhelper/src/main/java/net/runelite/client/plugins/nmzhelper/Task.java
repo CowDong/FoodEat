@@ -7,9 +7,10 @@ import net.runelite.client.callback.ClientThread;
 import javax.inject.Inject;
 
 public abstract class Task {
-    public Task(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
+    public Task(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config) {
         this.plugin = plugin;
         this.client = client;
+        this.clientThread = clientThread;
         this.config = config;
     }
 

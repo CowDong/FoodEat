@@ -16,14 +16,15 @@ import net.runelite.api.queries.GameObjectQuery;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
 import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class SearchRewardsChestTask extends Task {
-    public SearchRewardsChestTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
-        super(plugin, client, config);
+    public SearchRewardsChestTask(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config) {
+        super(plugin, client, clientThread, config);
     }
 
     @Override

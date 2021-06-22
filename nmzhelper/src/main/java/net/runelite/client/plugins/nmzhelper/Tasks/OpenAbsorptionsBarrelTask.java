@@ -16,14 +16,15 @@ import net.runelite.api.queries.GameObjectQuery;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.nmzhelper.MiscUtils;
 import net.runelite.client.plugins.nmzhelper.NMZHelperConfig;
 import net.runelite.client.plugins.nmzhelper.NMZHelperPlugin;
 import net.runelite.client.plugins.nmzhelper.Task;
 
 public class OpenAbsorptionsBarrelTask extends Task {
-    public OpenAbsorptionsBarrelTask(NMZHelperPlugin plugin, Client client, NMZHelperConfig config) {
-        super(plugin, client, config);
+    public OpenAbsorptionsBarrelTask(NMZHelperPlugin plugin, Client client, ClientThread clientThread, NMZHelperConfig config) {
+        super(plugin, client, clientThread, config);
     }
 
     @Override
@@ -78,7 +79,16 @@ public class OpenAbsorptionsBarrelTask extends Task {
         if (gameObject == null)
             return;
 
-        clientThread.invoke(() -> client.invokeMenuAction("Take", "<col=ffff>Absorption potion", ObjectID.ABSORPTION_POTION, MenuAction.GAME_OBJECT_SECOND_OPTION.getId(), gameObject.getSceneMinLocation().getX(), gameObject.getSceneMinLocation().getY()));
+        clientThread.invoke(() ->
+                client.invokeMenuAction(
+                        "Take",
+                        "<col=ffff>Absorption potion",
+                        ObjectID.ABSORPTION_POTION,
+                        MenuAction.GAME_OBJECT_SECOND_OPTION.getId(),
+                        gameObject.getSceneMinLocation().getX(),
+                        gameObject.getSceneMinLocation().getY()
+                )
+        );
         //entry = new MenuEntry("Take", "<col=ffff>Absorption potion", ObjectID.ABSORPTION_POTION, MenuAction.GAME_OBJECT_SECOND_OPTION.getId(), gameObject.getSceneMinLocation().getX(), gameObject.getSceneMinLocation().getY(), false);
         //click();
     }

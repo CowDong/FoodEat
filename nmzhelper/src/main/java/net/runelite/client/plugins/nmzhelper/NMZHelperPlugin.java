@@ -12,6 +12,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.util.Text;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
@@ -79,6 +80,9 @@ public class NMZHelperPlugin extends Plugin {
     private Client client;
 
     @Inject
+    private ClientThread clientThread;
+
+    @Inject
     private NMZHelperConfig config;
 
     @Inject
@@ -109,7 +113,7 @@ public class NMZHelperPlugin extends Plugin {
         overlayManager.add(overlay);
         status = "initializing...";
         tasks.clear();
-        tasks.addAll(this, client, config, taskClassList);
+        tasks.addAll(this, client, clientThread, config, taskClassList);
     }
 
     @Override
