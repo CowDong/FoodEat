@@ -90,9 +90,9 @@ public class DominicDreamTask extends Task {
         if (dominicOnion == null)
             return;
 
-        //String option, String target, int identifier, int opcode, int param0, int param1, boolean forceLeftClick
-        entry = new MenuEntry("Dream", "<col=ffff00>Dominic Onion", dominicOnion.getIndex(), MenuAction.NPC_THIRD_OPTION.getId(), 0, 0, false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Dream", "<col=ffff00>Dominic Onion", dominicOnion.getIndex(), MenuAction.NPC_THIRD_OPTION.getId(), 0, 0));
+        //entry = new MenuEntry("Dream", "<col=ffff00>Dominic Onion", dominicOnion.getIndex(), MenuAction.NPC_THIRD_OPTION.getId(), 0, 0, false);
+        //click();
     }
 
     public int getAbsorptionDoseCount() {

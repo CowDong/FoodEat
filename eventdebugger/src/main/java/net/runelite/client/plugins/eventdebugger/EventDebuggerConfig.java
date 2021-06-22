@@ -9,7 +9,29 @@ import net.runelite.client.config.ConfigTitle;
 public interface EventDebuggerConfig extends Config
 {
 	@ConfigTitle(
-		position = 0,
+			position = 0,
+			keyName = "menuOptionClickedSection",
+			name = "MenuOptionClicked",
+			description = ""
+	)
+	String menuOptionClickedSection = "menuOptionClickedSection";
+
+	@ConfigItem(
+			position = 1,
+			keyName = "menuOptionClicked",
+			name = "Debug MenuOptionClicked",
+			description = "",
+			section = "menuEntryOptionClicked"
+	)
+	default boolean menuOptionClicked()
+	{
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////
+
+	@ConfigTitle(
+		position = 2,
 		keyName = "menuEntryAddedSection",
 		name = "MenuEntryAdded",
 		description = ""
@@ -17,7 +39,7 @@ public interface EventDebuggerConfig extends Config
 	String menuEntryAddedSection = "menuEntryAddedSection";
 
 	@ConfigItem(
-		position = 1,
+		position = 3,
 		keyName = "menuEntryAdded",
 		name = "Debug MenuEntryAdded",
 		description = "",
@@ -31,7 +53,7 @@ public interface EventDebuggerConfig extends Config
 	//////////////////////////////////////////////////////////////
 
 	@ConfigItem(
-		position = 2,
+		position = 4,
 		keyName = "optionCheckbox",
 		name = "Filter by option",
 		description = "",
@@ -43,7 +65,7 @@ public interface EventDebuggerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 3,
+		position = 5,
 		keyName = "optionFilter",
 		name = "Option Filter",
 		description = "case sensitive",
@@ -59,7 +81,7 @@ public interface EventDebuggerConfig extends Config
 	//////////////////////////////////////////////////////////////
 
 	@ConfigItem(
-		position = 4,
+		position = 6,
 		keyName = "targetCheckbox",
 		name = "Filter by target",
 		description = "",
@@ -71,7 +93,7 @@ public interface EventDebuggerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 5,
+		position = 7,
 		keyName = "targetFilter",
 		name = "Target Filter",
 		description = "case sensitive",
@@ -87,7 +109,7 @@ public interface EventDebuggerConfig extends Config
 	//////////////////////////////////////////////////////////////
 
 	@ConfigItem(
-		position = 6,
+		position = 8,
 		keyName = "identifierCheckbox",
 		name = "Filter by identifier",
 		description = "",
@@ -99,7 +121,7 @@ public interface EventDebuggerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 7,
+		position = 9,
 		keyName = "identifierFilter",
 		name = "Identifier Filter",
 		description = "case sensitive",
@@ -115,7 +137,7 @@ public interface EventDebuggerConfig extends Config
 	//////////////////////////////////////////////////////////////
 
 	@ConfigItem(
-		position = 8,
+		position = 10,
 		keyName = "opcodeCheckbox",
 		name = "Filter by opcode",
 		description = "",
@@ -127,7 +149,7 @@ public interface EventDebuggerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 9,
+		position = 11,
 		keyName = "opcodeFilter",
 		name = "Opcode Filter",
 		description = "case sensitive",
@@ -143,7 +165,7 @@ public interface EventDebuggerConfig extends Config
 	//////////////////////////////////////////////////////////////
 
 	@ConfigItem(
-		position = 10,
+		position = 12,
 		keyName = "param0Checkbox",
 		name = "Filter by param0",
 		description = "",
@@ -155,7 +177,7 @@ public interface EventDebuggerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 11,
+		position = 13,
 		keyName = "param0Filter",
 		name = "Param0 Filter",
 		description = "case sensitive",
@@ -171,7 +193,7 @@ public interface EventDebuggerConfig extends Config
 	//////////////////////////////////////////////////////////////
 
 	@ConfigItem(
-		position = 12,
+		position = 14,
 		keyName = "param1Checkbox",
 		name = "Filter by param1",
 		description = "",
@@ -183,7 +205,7 @@ public interface EventDebuggerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 13,
+		position = 15,
 		keyName = "param1Filter",
 		name = "Param1 Filter",
 		description = "case sensitive",

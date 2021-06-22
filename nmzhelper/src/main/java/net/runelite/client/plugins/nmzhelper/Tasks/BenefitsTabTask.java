@@ -113,8 +113,9 @@ public class BenefitsTabTask extends Task {
             return;
         }
 
-        entry = new MenuEntry("Benefits", "", 1, MenuAction.CC_OP.getId(), 4, benefitTab.getId(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Benefits", "", 1, MenuAction.CC_OP.getId(), 4, benefitTab.getId()));
+        //entry = new MenuEntry("Benefits", "", 1, MenuAction.CC_OP.getId(), 4, benefitTab.getId(), false);
+        //click();
     }
 
     public int getAbsorptionDoseCount() {

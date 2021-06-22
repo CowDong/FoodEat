@@ -105,8 +105,9 @@ public class BuyAbsorptionsTask extends Task {
             return;
         }
 
-        entry = new MenuEntry("Buy-50", "<col=ff9040>Absorption (1)", 4, MenuAction.CC_OP.getId(), 9, absorptionWidget.getId(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Buy-50", "<col=ff9040>Absorption (1)", 4, MenuAction.CC_OP.getId(), 9, absorptionWidget.getId()));
+        //entry = new MenuEntry("Buy-50", "<col=ff9040>Absorption (1)", 4, MenuAction.CC_OP.getId(), 9, absorptionWidget.getId(), false);
+        //click();
     }
 
     public int getAbsorptionDoseCount() {

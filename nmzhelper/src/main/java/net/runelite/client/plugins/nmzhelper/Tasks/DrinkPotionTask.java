@@ -77,8 +77,9 @@ public class DrinkPotionTask extends Task {
         if (object == null)
             return;
 
-        entry = new MenuEntry("Drink", "<col=ffff><col=ff9040>Potion", 26291, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), object.getSceneMinLocation().getX(), object.getSceneMinLocation().getY(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Drink", "<col=ffff><col=ff9040>Potion", 26291, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), object.getSceneMinLocation().getX(), object.getSceneMinLocation().getY()));
+        //entry = new MenuEntry("Drink", "<col=ffff><col=ff9040>Potion", 26291, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), object.getSceneMinLocation().getX(), object.getSceneMinLocation().getY(), false);
+        //click();
     }
 
     public int getAbsorptionDoseCount() {

@@ -2,7 +2,6 @@ package net.runelite.client.plugins.continueclicker;
 
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
-import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -14,8 +13,6 @@ import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.awt.*;
-import java.awt.event.MouseEvent;
 
 @Singleton
 @Extension
@@ -74,6 +71,12 @@ public class ContinueClickerPlugin extends Plugin {
 
     public Widget getContinueWidget() {
         Widget widget = client.getWidget(WidgetInfo.LEVEL_UP_CONTINUE);
+
+        if (widget != null && !widget.isHidden()) {
+            return widget;
+        }
+
+        widget = client.getWidget(WidgetInfo.MINIGAME_DIALOG_CONTINUE);
 
         if (widget != null && !widget.isHidden()) {
             return widget;

@@ -1,7 +1,9 @@
 package net.runelite.client.plugins.eventdebugger;
 
 import com.google.inject.Provides;
+
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
@@ -16,105 +18,96 @@ import org.pf4j.Extension;
 
 @Extension
 @PluginDescriptor(
-	name = "Event Debugger",
-	description = "",
-	tags = {"combat", "notifications", "health", "food", "eat"},
-	enabledByDefault = false
+        name = "Event Debugger",
+        description = "",
+        tags = {"combat", "notifications", "health", "food", "eat"},
+        enabledByDefault = false
 )
 @Slf4j
-public class EventDebuggerPlugin extends Plugin
-{
-	@Inject
-	private Client client;
+public class EventDebuggerPlugin extends Plugin {
+    @Inject
+    private Client client;
 
-	@Inject
-	private Notifier notifier;
+    @Inject
+    private Notifier notifier;
 
-	@Inject
-	private EventDebuggerConfig config;
+    @Inject
+    private EventDebuggerConfig config;
 
-	@Provides
-	EventDebuggerConfig provideConfig(final ConfigManager configManager)
-	{
-		return configManager.getConfig(EventDebuggerConfig.class);
-	}
+    @Provides
+    EventDebuggerConfig provideConfig(final ConfigManager configManager) {
+        return configManager.getConfig(EventDebuggerConfig.class);
+    }
 
-	@Override
-	protected void startUp() throws Exception
-	{
-	}
+    @Override
+    protected void startUp() throws Exception {
+    }
 
-	@Override
-	protected void shutDown() throws Exception
-	{
-	}
+    @Override
+    protected void shutDown() throws Exception {
+    }
 
-	@Subscribe
-	public void onGameTick(final GameTick event)
-	{
+    @Subscribe
+    public void onGameTick(final GameTick event) {
 
-	}
+    }
 
-	@Subscribe
-	public void onMenuEntryAdded(final MenuEntryAdded event)
-	{
+    @Subscribe
+    public void onMenuEntryAdded(final MenuEntryAdded event) {
 
-		if (!config.menuEntryAdded())
-		{
-			return;
-		}
+        if (!config.menuEntryAdded()) {
+            return;
+        }
 
-		if (config.optionCheckbox() && !event.getOption().contains(config.optionFilter()))
-		{
-			return;
-		}
+        if (config.optionCheckbox() && !event.getOption().contains(config.optionFilter())) {
+            return;
+        }
 
-		if (config.targetCheckbox() && !event.getTarget().contains(config.targetFilter()))
-		{
-			return;
-		}
+        if (config.targetCheckbox() && !event.getTarget().contains(config.targetFilter())) {
+            return;
+        }
 
-		if (config.identifierCheckbox() && event.getIdentifier() != config.identifierFilter())
-		{
-			return;
-		}
+        if (config.identifierCheckbox() && event.getIdentifier() != config.identifierFilter()) {
+            return;
+        }
 
-		if (config.opcodeCheckbox() && event.getOpcode() != config.opcodeFilter())
-		{
-			return;
-		}
+        if (config.opcodeCheckbox() && event.getOpcode() != config.opcodeFilter()) {
+            return;
+        }
 
-		if (config.param0Checkbox() && event.getParam0() != config.param0Filter())
-		{
-			return;
-		}
+        if (config.param0Checkbox() && event.getParam0() != config.param0Filter()) {
+            return;
+        }
 
-		if (config.param1Checkbox() && event.getParam1() != config.param1Filter())
-		{
-			return;
-		}
+        if (config.param1Checkbox() && event.getParam1() != config.param1Filter()) {
+            return;
+        }
 
-		log.info("MenuEntryAdded:");
-		log.info("\tOption:\t" + event.getOption());
-		log.info("\tTarget:\t" + event.getTarget());
-		log.info("\tIdentifier:\t" + event.getIdentifier());
-		log.info("\tOpcode:\t" + event.getOpcode());
-		log.info("\tParam0:\t" + event.getParam0());
-		log.info("\tParam1:\t" + event.getParam1());
-		log.info("\tForceLeftClick:\t" + event.isForceLeftClick());
-		log.info("\tModified:\t" + event.isModified());
+        log.info("MenuEntryAdded:");
+        log.info("\tOption:\t" + event.getOption());
+        log.info("\tTarget:\t" + event.getTarget());
+        log.info("\tIdentifier:\t" + event.getIdentifier());
+        log.info("\tOpcode:\t" + event.getOpcode());
+        log.info("\tParam0:\t" + event.getParam0());
+        log.info("\tParam1:\t" + event.getParam1());
+        log.info("\tForceLeftClick:\t" + event.isForceLeftClick());
+        log.info("\tModified:\t" + event.isModified());
 
-	}
+    }
 
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event) {
-		log.info("MenuOptionClicked:");
-		log.info("\tOption:\t" + event.getMenuOption());
-		log.info("\tTarget:\t" + event.getMenuTarget());
-		log.info("\tIdentifier:\t" + event.getId());
-		log.info("\tOpcode:\t" + event.getMenuAction());
-		log.info("\tParam0:\t" + event.getActionParam());
-		log.info("\tParam1:\t" + event.getWidgetId());
-		log.info("\tForceLeftClick:\t" + event.getSelectedItemIndex());
-	}
+    @Subscribe
+    public void onMenuOptionClicked(MenuOptionClicked event) {
+        if (!config.menuOptionClicked()) {
+            return;
+        }
+
+        log.info("MenuOptionClicked:");
+        log.info("\tOption:\t" + event.getMenuOption());
+        log.info("\tTarget:\t" + event.getMenuTarget());
+        log.info("\tIdentifier:\t" + event.getId());
+        log.info("\tOpcode:\t" + event.getMenuAction());
+        log.info("\tParam0:\t" + event.getActionParam());
+        log.info("\tParam1:\t" + event.getWidgetId());
+        log.info("\tForceLeftClick:\t" + event.getSelectedItemIndex());
+    }
 }

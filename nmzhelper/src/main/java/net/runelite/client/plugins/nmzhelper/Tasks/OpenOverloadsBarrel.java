@@ -80,8 +80,9 @@ public class OpenOverloadsBarrel extends Task {
         if (gameObject == null)
             return;
 
-        entry = new MenuEntry("Take", "<col=ffff>Overload potion", ObjectID.OVERLOAD_POTION, MenuAction.GAME_OBJECT_SECOND_OPTION.getId(), gameObject.getSceneMinLocation().getX(), gameObject.getSceneMinLocation().getY(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Take", "<col=ffff>Overload potion", ObjectID.OVERLOAD_POTION, MenuAction.GAME_OBJECT_SECOND_OPTION.getId(), gameObject.getSceneMinLocation().getX(), gameObject.getSceneMinLocation().getY()));
+        //entry = new MenuEntry("Take", "<col=ffff>Overload potion", ObjectID.OVERLOAD_POTION, MenuAction.GAME_OBJECT_SECOND_OPTION.getId(), gameObject.getSceneMinLocation().getX(), gameObject.getSceneMinLocation().getY(), false);
+        //click();
     }
 
     public int getDoseCount() {

@@ -28,6 +28,7 @@ import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.kit.KitType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.input.KeyManager;
@@ -51,10 +52,13 @@ public class PkToolsPlugin extends Plugin
 	private static final Duration WAIT = Duration.ofSeconds(5);
 
 	public Queue<ScriptCommand> commandList = new ConcurrentLinkedQueue<>();
-	public Queue<MenuEntry> entryList = new ConcurrentLinkedQueue<>();
+	//public Queue<MenuEntry> entryList = new ConcurrentLinkedQueue<>();
 
 	@Inject
 	public Client client;
+
+	@Inject
+	public ClientThread clientThread;
 
 	@Inject
 	private PkToolsConfig config;
@@ -165,26 +169,6 @@ public class PkToolsPlugin extends Plugin
 		}
 	}
 
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (entryList != null && !entryList.isEmpty())
-		{
-			event.setMenuEntry(entryList.poll());
-			handleHotkeyTasks();
-		}
-	}
-
-	public void handleHotkeyTasks()
-	{
-		if (entryList == null || entryList.isEmpty())
-		{
-			return;
-		}
-
-		click();
-	}
-
 	public void lastEnemyTimer()
 	{
 		Player localPlayer = client.getLocalPlayer();
@@ -240,8 +224,9 @@ public class PkToolsPlugin extends Plugin
 			return;
 		}
 
-		entryList.add(new MenuEntry("Activate", prayer_widget.getName(), 1, MenuAction.CC_OP.getId(), prayer_widget.getItemId(), prayer_widget.getId(), false));
-		click();
+		//entryList.add(new MenuEntry("Activate", prayer_widget.getName(), 1, MenuAction.CC_OP.getId(), prayer_widget.getItemId(), prayer_widget.getId(), false));
+		clientThread.invoke(() -> client.invokeMenuAction("Activate", prayer_widget.getName(), 1, MenuAction.CC_OP.getId(), prayer_widget.getItemId(), prayer_widget.getId()));
+		//click();
 	}
 
 	public void doAutoSwapPrayers()
@@ -296,27 +281,5 @@ public class PkToolsPlugin extends Plugin
 		{
 			e.printStackTrace();
 		}
-	}
-
-	public void click()
-	{
-		Point pos = client.getMouseCanvasPosition();
-
-		if (client.isStretchedEnabled())
-		{
-			final Dimension stretched = client.getStretchedDimensions();
-			final Dimension real = client.getRealDimensions();
-			final double width = (stretched.width / real.getWidth());
-			final double height = (stretched.height / real.getHeight());
-			final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			return;
-		}
-
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
 	}
 }

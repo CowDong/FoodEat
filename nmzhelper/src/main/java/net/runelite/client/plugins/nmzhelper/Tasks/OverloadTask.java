@@ -77,7 +77,8 @@ public class OverloadTask extends Task {
         if (item == null)
             return;
 
-        entry = MiscUtils.getConsumableEntry("", item.getId(), item.getIndex());
-        click();
+        MenuEntry entry = MiscUtils.getConsumableEntry("", item.getId(), item.getIndex());
+        clientThread.invoke(() -> client.invokeMenuAction(entry.getOption(), entry.getTarget(), entry.getIdentifier(), entry.getOpcode(), entry.getParam0(), entry.getParam1()));
+        //click();
     }
 }

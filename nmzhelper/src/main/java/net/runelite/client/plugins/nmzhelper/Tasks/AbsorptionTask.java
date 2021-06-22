@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
@@ -81,8 +82,8 @@ public class AbsorptionTask extends Task {
         if (item == null)
             return;
 
-        entry = MiscUtils.getConsumableEntry("", item.getId(), item.getIndex());
-        click();
+        MenuEntry entry = MiscUtils.getConsumableEntry("", item.getId(), item.getIndex());
+        clientThread.invoke(() -> client.invokeMenuAction(entry.getOption(), entry.getTarget(), entry.getIdentifier(), entry.getOpcode(), entry.getParam0(), entry.getParam1()));
 
         nextAbsorptionValue = r.nextInt(config.absorptionThresholdMax() - config.absorptionThresholdMin()) + config.absorptionThresholdMin();
     }

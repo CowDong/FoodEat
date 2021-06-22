@@ -1,12 +1,6 @@
 package net.runelite.client.plugins.nmzhelper;
 
 import com.google.inject.Provides;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -15,7 +9,6 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ConfigButtonClicked;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.util.Text;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -27,27 +20,14 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.nmzhelper.Tasks.AbsorptionTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.AcceptDreamTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.BenefitsTabTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.BuyAbsorptionsTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.BuyOverloadsTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.ContinueDialogTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.DominicDialogue1Task;
-import net.runelite.client.plugins.nmzhelper.Tasks.DominicDialogue2Task;
-import net.runelite.client.plugins.nmzhelper.Tasks.DominicDreamTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.DrinkPotionTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.OpenAbsorptionsBarrelTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.OpenOverloadsBarrel;
-import net.runelite.client.plugins.nmzhelper.Tasks.OverloadTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.PowerSurgeTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.RockCakeTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.SearchRewardsChestTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.SpecialAttackTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.WithdrawAbsorptionTask;
-import net.runelite.client.plugins.nmzhelper.Tasks.WithdrawOverloadTask;
+import net.runelite.client.plugins.nmzhelper.Tasks.*;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.pf4j.Extension;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 @Extension
@@ -231,23 +211,6 @@ public class NMZHelperPlugin extends Plugin {
         client.setUsername(config.email());
         client.setPassword(config.password());
         client.setGameState(GameState.LOGGING_IN);
-    }
-
-    @Subscribe
-    public void onMenuOptionClicked(MenuOptionClicked event) {
-        if (!pluginStarted) {
-            return;
-        }
-
-        if (client.getGameState() != GameState.LOGGED_IN) {
-            return;
-        }
-
-        Task task = tasks.getValidTask();
-        if (task != null) {
-            status = task.getTaskDescription();
-            task.onMenuOptionClicked(event);
-        }
     }
 
     private void sendGameMessage(String message) {

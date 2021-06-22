@@ -65,7 +65,8 @@ public class PowerSurgeTask extends Task {
             return;
         }
 
-        entry = new MenuEntry("Activate", "<col=ffff>Power surge", ObjectID.POWER_SURGE, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Activate", "<col=ffff>Power surge", ObjectID.POWER_SURGE, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY()));
+        //entry = new MenuEntry("Activate", "<col=ffff>Power surge", ObjectID.POWER_SURGE, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY(), false);
+        //click();
     }
 }

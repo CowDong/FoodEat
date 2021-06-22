@@ -47,8 +47,5 @@ public class ContinueDialogTask extends Task {
                 MenuAction.WIDGET_TYPE_6.getId(),
                 -1,
                 widget.getId());
-
-        //entry = new MenuEntry("Continue", "", 0, MenuAction.WIDGET_TYPE_6.getId(), -1, widget.getId(), false);
-        //click();
     }
 }

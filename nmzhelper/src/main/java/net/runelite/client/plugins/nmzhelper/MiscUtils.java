@@ -1,12 +1,11 @@
 package net.runelite.client.plugins.nmzhelper;
 
-import java.util.Arrays;
-
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.MenuAction;
 import net.runelite.api.widgets.WidgetInfo;
+
+import java.util.Arrays;
 
 public class MiscUtils {
     private static final int[] NMZ_MAP_REGION = {9033};

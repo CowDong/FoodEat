@@ -87,8 +87,9 @@ public class SearchRewardsChestTask extends Task {
             return;
         }
 
-        entry = new MenuEntry("Search", "<col=ffff>Rewards chest", ObjectID.REWARDS_CHEST, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Search", "<col=ffff>Rewards chest", ObjectID.REWARDS_CHEST, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY()));
+        //entry = new MenuEntry("Search", "<col=ffff>Rewards chest", ObjectID.REWARDS_CHEST, MenuAction.GAME_OBJECT_FIRST_OPTION.getId(), obj.getSceneMinLocation().getX(), obj.getSceneMinLocation().getY(), false);
+        //click();
     }
 
     public int getAbsorptionDoseCount() {

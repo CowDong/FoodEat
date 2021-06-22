@@ -84,8 +84,9 @@ public class BuyOverloadsTask extends Task {
             return;
         }
 
-        entry = new MenuEntry("Buy-50", "<col=ff9040>Overload (1)", 4, MenuAction.CC_OP.getId(), 6, overloadWidget.getId(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Buy-50", "<col=ff9040>Overload (1)", 4, MenuAction.CC_OP.getId(), 6, overloadWidget.getId()));
+        //entry = new MenuEntry("Buy-50", "<col=ff9040>Overload (1)", 4, MenuAction.CC_OP.getId(), 6, overloadWidget.getId(), false);
+        //click();
     }
 
     public int getAbsorptionDoseCount() {

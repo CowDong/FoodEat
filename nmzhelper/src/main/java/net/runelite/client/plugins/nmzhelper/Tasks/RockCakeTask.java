@@ -86,7 +86,8 @@ public class RockCakeTask extends Task {
 
         WidgetItem item = items.get(0);
 
-        entry = new MenuEntry("Guzzle", "<col=ff9040>Dwarven rock cake", item.getId(), MenuAction.ITEM_THIRD_OPTION.getId(), item.getIndex(), WidgetInfo.INVENTORY.getId(), false);
-        click();
+        clientThread.invoke(() -> client.invokeMenuAction("Guzzle", "<col=ff9040>Dwarven rock cake", item.getId(), MenuAction.ITEM_THIRD_OPTION.getId(), item.getIndex(), WidgetInfo.INVENTORY.getId()));
+        //entry = new MenuEntry("Guzzle", "<col=ff9040>Dwarven rock cake", item.getId(), MenuAction.ITEM_THIRD_OPTION.getId(), item.getIndex(), WidgetInfo.INVENTORY.getId(), false);
+        //click();
     }
 }
