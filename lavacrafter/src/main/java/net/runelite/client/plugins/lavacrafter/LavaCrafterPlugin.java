@@ -35,6 +35,7 @@ import net.runelite.api.queries.GameObjectQuery;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -58,6 +59,9 @@ public class LavaCrafterPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	private LavaCrafterConfig config;
 
 	@Inject
@@ -72,8 +76,6 @@ public class LavaCrafterPlugin extends Plugin
 	Random r = new Random();
 	int nextRunVal = r.nextInt(99) + 1;
 
-	private MenuEntry entry;
-
 	boolean pluginStarted = false;
 	private int tickDelay = 0;
 
@@ -81,8 +83,8 @@ public class LavaCrafterPlugin extends Plugin
 
 	LavaCrafterState state = LavaCrafterState.USE_BANK_CHEST;
 
-	private BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(1);
-	private ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 25, TimeUnit.SECONDS, queue,
+	private final BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(1);
+	private final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 25, TimeUnit.SECONDS, queue,
 		new ThreadPoolExecutor.DiscardPolicy());
 
 	@Provides
@@ -236,11 +238,20 @@ public class LavaCrafterPlugin extends Plugin
 			return;
 		}
 
-		entry = getEntry(localPlayer);
+		MenuEntry entry = getEntry(localPlayer);
 
 		if (entry != null)
 		{
-			click();
+			clientThread.invoke(() ->
+					client.invokeMenuAction(
+							entry.getOption(),
+							entry.getTarget(),
+							entry.getIdentifier(),
+							entry.getOpcode(),
+							entry.getParam0(),
+							entry.getParam1()
+					)
+			);
 			tickDelay = getRandomTickDelay(state.tickDelay);
 		}
 	}
@@ -268,8 +279,17 @@ public class LavaCrafterPlugin extends Plugin
 
 		if (!runEnabled && energy > nextRunVal)
 		{
-			entry = new MenuEntry("Toggle Run", "", 1, MenuAction.CC_OP.getId(), -1, 10485782, false);
-			click();
+			clientThread.invoke(() ->
+					client.invokeMenuAction(
+							"Toggle Run",
+							"",
+							1,
+							MenuAction.CC_OP.getId(),
+							-1,
+							10485782
+					)
+			);
+
 			nextRunVal = r.nextInt(99) + 1;
 
 			return true;
@@ -606,38 +626,5 @@ public class LavaCrafterPlugin extends Plugin
 		}
 
 		return false;
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (entry != null)
-		{
-			event.setMenuEntry(entry);
-		}
-
-		entry = null;
-	}
-
-	public void click()
-	{
-		Point pos = client.getMouseCanvasPosition();
-
-		if (client.isStretchedEnabled())
-		{
-			final Dimension stretched = client.getStretchedDimensions();
-			final Dimension real = client.getRealDimensions();
-			final double width = (stretched.width / real.getWidth());
-			final double height = (stretched.height / real.getHeight());
-			final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			return;
-		}
-
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
 	}
 }

@@ -25,7 +25,7 @@ public class RemoveDialogueTask extends Task {
     @Override
     public boolean validate() {
         // check for remove option dialogue
-        Widget remove_dialogue_widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
+        Widget remove_dialogue_widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 
         if (remove_dialogue_widget != null) {
             Widget[] children = remove_dialogue_widget.getChildren();
@@ -42,7 +42,7 @@ public class RemoveDialogueTask extends Task {
 
     @Override
     public void onGameTick(GameTick event) {
-        Widget remove_dialogue_widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
+        Widget remove_dialogue_widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 
         if (remove_dialogue_widget != null) {
             Widget[] children = remove_dialogue_widget.getChildren();

@@ -15,6 +15,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -36,12 +37,13 @@ public class PrayPotDrinkerPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	private PrayPotDrinkerConfig config;
 
 	@Inject
 	private ItemManager itemManager;
-
-	private MenuEntry entry;
 
 	private Random r = new Random();
 	private int nextRestoreVal = 0;
@@ -102,8 +104,16 @@ public class PrayPotDrinkerPlugin extends Plugin
 
 			if (currentPrayerPoints <= nextRestoreVal)
 			{
-				entry = getConsumableEntry(itemManager.getItemComposition(restoreItem.getId()).getName(), restoreItem.getId(), restoreItem.getIndex());
-				click();
+				clientThread.invoke(() ->
+						client.invokeMenuAction(
+								"Drink",
+								"<col=ff9040>Potion",
+								restoreItem.getId(),
+								MenuAction.ITEM_FIRST_OPTION.getId(),
+								restoreItem.getIndex(),
+								WidgetInfo.INVENTORY.getId()
+						)
+				);
 				nextRestoreVal = r.nextInt(config.maxPrayerLevel() - config.minPrayerLevel()) + config.minPrayerLevel();
 			}
 		}
@@ -111,17 +121,6 @@ public class PrayPotDrinkerPlugin extends Plugin
 		{
 			e.printStackTrace();
 		}
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (entry != null)
-		{
-			event.setMenuEntry(entry);
-		}
-
-		entry = null;
 	}
 
 	private MenuEntry getConsumableEntry(String itemName, int itemId, int itemIndex)
@@ -168,27 +167,5 @@ public class PrayPotDrinkerPlugin extends Plugin
 		}
 
 		return 0;
-	}
-
-	public void click()
-	{
-		Point pos = client.getMouseCanvasPosition();
-
-		if (client.isStretchedEnabled())
-		{
-			final Dimension stretched = client.getStretchedDimensions();
-			final Dimension real = client.getRealDimensions();
-			final double width = (stretched.width / real.getWidth());
-			final double height = (stretched.height / real.getHeight());
-			final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			return;
-		}
-
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
 	}
 }

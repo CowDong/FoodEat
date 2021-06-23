@@ -14,6 +14,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -33,9 +34,10 @@ public class SpecialAttackUserPlugin extends Plugin
 	private Client client;
 
 	@Inject
-	private SpecialAttackUserConfig config;
+	private ClientThread clientThread;
 
-	private MenuEntry entry;
+	@Inject
+	private SpecialAttackUserConfig config;
 
 	@Provides
 	SpecialAttackUserConfig provideConfig(final ConfigManager configManager)
@@ -103,45 +105,20 @@ public class SpecialAttackUserPlugin extends Plugin
 
 		try
 		{
-			entry = new MenuEntry("Use <col=00ff00>Special Attack</col>", "", 1, MenuAction.CC_OP.getId(), -1, 38862884, false);
-			click();
+			clientThread.invoke(() ->
+					client.invokeMenuAction(
+							"Use <col=00ff00>Special Attack</col>",
+							"",
+							1,
+							MenuAction.CC_OP.getId(),
+							-1,
+							38862884
+					)
+			);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (entry != null)
-		{
-			event.setMenuEntry(entry);
-		}
-
-		entry = null;
-	}
-
-	public void click()
-	{
-		Point pos = client.getMouseCanvasPosition();
-
-		if (client.isStretchedEnabled())
-		{
-			final Dimension stretched = client.getStretchedDimensions();
-			final Dimension real = client.getRealDimensions();
-			final double width = (stretched.width / real.getWidth());
-			final double height = (stretched.height / real.getHeight());
-			final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			return;
-		}
-
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
 	}
 }

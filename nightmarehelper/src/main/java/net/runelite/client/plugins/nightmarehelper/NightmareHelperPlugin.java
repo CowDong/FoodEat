@@ -25,6 +25,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcChanged;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -47,6 +48,9 @@ public class NightmareHelperPlugin extends Plugin {
     private Client client;
 
     @Inject
+    private ClientThread clientThread;
+
+    @Inject
     private NightmareHelperConfig config;
 
     @Nullable
@@ -61,8 +65,6 @@ public class NightmareHelperPlugin extends Plugin {
     private boolean swapRange;
     private boolean swapMelee;
     private Prayer prayerToClick;
-
-    private MenuEntry entry;
 
     public NightmareHelperPlugin() {
         inFight = false;
@@ -213,14 +215,6 @@ public class NightmareHelperPlugin extends Plugin {
         }
     }
 
-    @Subscribe
-    public void onMenuOptionClicked(MenuOptionClicked event) {
-        if (entry != null) {
-            event.setMenuEntry(entry);
-        }
-        entry = null;
-    }
-
     public void activatePrayer(Prayer prayer) {
         if (client.isPrayerActive(prayer)) {
             return;
@@ -236,27 +230,12 @@ public class NightmareHelperPlugin extends Plugin {
             return;
         }
 
-        entry = new MenuEntry("Activate", prayer_widget.getName(), 1, MenuAction.CC_OP.getId(), prayer_widget.getItemId(), prayer_widget.getId(), false);
-        click();
-    }
-
-    public void click() {
-        Point pos = client.getMouseCanvasPosition();
-
-        if (client.isStretchedEnabled()) {
-            final Dimension stretched = client.getStretchedDimensions();
-            final Dimension real = client.getRealDimensions();
-            final double width = (stretched.width / real.getWidth());
-            final double height = (stretched.height / real.getHeight());
-            final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-            client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-            client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-            client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-            return;
-        }
-
-        client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-        client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-        client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
+        clientThread.invoke(() ->
+                client.invokeMenuAction("Activate",
+                        prayer_widget.getName(),
+                        1,
+                        MenuAction.CC_OP.getId(),
+                        prayer_widget.getItemId(),
+                        prayer_widget.getId()));
     }
 }

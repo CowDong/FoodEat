@@ -1,241 +1,146 @@
 package net.runelite.client.plugins.itemuser;
 
 import com.google.inject.Provides;
-import java.awt.Dimension;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import net.runelite.api.Client;
-import net.runelite.api.GameObject;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.MenuAction;
-import net.runelite.api.Point;
+import net.runelite.api.*;
+import net.runelite.api.events.ConfigButtonClicked;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.queries.GameObjectQuery;
-import net.runelite.api.util.Text;
-import net.runelite.api.widgets.Widget;
+import net.runelite.api.queries.InventoryWidgetItemQuery;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.util.HotkeyListener;
 import org.pf4j.Extension;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 @Extension
 @PluginDescriptor(
-	name = "Item User",
-	description = "Automatically uses items on an object",
-	tags = {"skilling", "item", "object", "user"},
-	enabledByDefault = false
+        name = "Item User",
+        description = "Automatically uses items on an object",
+        tags = {"skilling", "item", "object", "user"},
+        enabledByDefault = false
 )
-public class ItemUserPlugin extends Plugin
-{
-	MenuEntry waitEntry = new MenuEntry();
+public class ItemUserPlugin extends Plugin {
+    @Inject
+    private Client client;
 
-	Random r = new Random();
+    @Inject
+    private ClientThread clientThread;
 
-	@Inject
-	private Client client;
+    @Inject
+    private ConfigManager configManager;
 
-	@Inject
-	private ClientThread clientThread;
+    @Inject
+    ItemUserConfig config;
 
-	@Inject
-	private ConfigManager configManager;
+    private boolean pluginStarted;
 
-	@Inject
-	ItemUserConfig config;
+    private int delay;
 
-	@Inject
-	private KeyManager keyManager;
+    @Override
+    protected void startUp() throws Exception {
+        pluginStarted = false;
+        delay = 0;
+    }
 
-	@Inject
-	private ItemManager itemManager;
+    @Override
+    protected void shutDown() throws Exception {
+        pluginStarted = false;
+        delay = 0;
+    }
 
-	private GameObject object;
-	private final List<WidgetItem> items = new ArrayList<>();
-	private String item_name;
-	private boolean iterating;
-	private int iterTicks;
+    @Subscribe
+    private void onGameTick(final GameTick event) {
+        if (!pluginStarted) {
+            return;
+        }
 
-	public Queue<MenuEntry> entryList = new ConcurrentLinkedQueue<>();
+        if (client.getGameState() != GameState.LOGGED_IN) {
+            return;
+        }
 
-	private final HotkeyListener toggle = new HotkeyListener(() -> config.useItemsKeybind())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			clientThread.invokeLater(() -> {
-				Widget inventoryWidget = client.getWidget(WidgetInfo.INVENTORY);
+        if (delay > 0) {
+            delay--;
+            return;
+        }
 
-				if (inventoryWidget == null)
-				{
-					return;
-				}
+        clientThread.invoke(() -> {
 
-				List<WidgetItem> list = inventoryWidget.getWidgetItems()
-					.stream()
-					.filter(item -> item.getId() == config.itemId())
-					.collect(Collectors.toList());
+            QueryResults<WidgetItem> widgetItemQueryResults = new InventoryWidgetItemQuery()
+                    .idEquals(config.itemId())
+                    .result(client);
 
-				items.addAll(list);
-				object = findNearestGameObject(config.objectId());
-				item_name = Text.standardize(itemManager.getItemComposition(config.itemId()).getName());
-			});
-		}
-	};
+            if (widgetItemQueryResults == null || widgetItemQueryResults.isEmpty()) {
+                return;
+            }
 
-	@Override
-	protected void startUp() throws Exception
-	{
-		this.keyManager.registerKeyListener(toggle);
-	}
+            WidgetItem firstItem = widgetItemQueryResults.first();
 
-	@Override
-	protected void shutDown() throws Exception
-	{
-		this.keyManager.unregisterKeyListener(toggle);
-	}
+            if (firstItem == null) {
+                return;
+            }
 
-	@Subscribe
-	private void onGameTick(final GameTick event)
-	{
-		if (items.isEmpty())
-		{
-			if (iterating)
-			{
-				iterTicks++;
-				if (iterTicks > 10)
-				{
-					iterating = false;
-				}
-			}
-			else
-			{
-				if (iterTicks > 0)
-				{
-					iterTicks = 0;
-				}
-			}
-			return;
-		}
+            GameObject object = findNearestGameObject(config.objectId());
 
-		useItems();
-		System.out.println("Clearing items");
-		items.clear();
-	}
+            if (object == null) {
+                return;
+            }
 
-	private void useItems()
-	{
-		iterating = true;
+            client.setSelectedItemWidget(WidgetInfo.INVENTORY.getId());
+            client.setSelectedItemSlot(firstItem.getIndex());
+            client.setSelectedItemID(firstItem.getId());
+            client.invokeMenuAction(
+                    "Use",
+                    "<col=ff9040>Item<col=ffffff> -> <col=ffff>GameObject",
+                    object.getId(),
+                    MenuAction.ITEM_USE_ON_GAME_OBJECT.getId(),
+                    object.getSceneMinLocation().getX(),
+                    object.getSceneMinLocation().getY()
+            );
 
-		if (items.isEmpty())
-		{
-			return;
-		}
+        });
 
-		if (item_name.isBlank() || item_name.isEmpty())
-		{
-			return;
-		}
+        delay = getRandomWait();
+    }
 
-		if (object == null)
-		{
-			return;
-		}
+    @Nullable
+    public GameObject findNearestGameObject(int... ids) {
+        assert client.isClientThread();
 
-		for (WidgetItem item : items)
-		{
-			entryList.add(new MenuEntry("Use", "<col=ff9040>" + itemManager.getItemComposition(item.getId()).getName(), item.getId(), MenuAction.ITEM_USE.getId(), item.getIndex(), WidgetInfo.INVENTORY.getId(), false));
+        if (client.getLocalPlayer() == null) {
+            return null;
+        }
 
-			int randDelay = r.nextInt(config.waitMax() - config.waitMin()) + config.waitMin();
+        return new GameObjectQuery()
+                .idEquals(ids)
+                .result(client)
+                .nearestTo(client.getLocalPlayer());
+    }
 
-			for (int i = 0; i < randDelay; i++)
-			{
-				entryList.add(waitEntry);
-			}
+    @Provides
+    ItemUserConfig provideConfig(final ConfigManager configManager) {
+        return configManager.getConfig(ItemUserConfig.class);
+    }
 
-			entryList.add(new MenuEntry("Use", "<col=ff9040>" + itemManager.getItemComposition(item.getId()).getName() + "<col=ffffff> -> <col=ffff>" + client.getObjectDefinition(object.getId()).getName(), object.getId(), MenuAction.ITEM_USE_ON_GAME_OBJECT.getId(), object.getSceneMinLocation().getX(), object.getSceneMinLocation().getY(), false));
+    @Subscribe
+    public void onConfigButtonClicked(ConfigButtonClicked event) {
+        if (!event.getGroup().equals("itemuser")) {
+            return;
+        }
 
-			randDelay = r.nextInt(config.waitMax() - config.waitMin()) + config.waitMin();
+        if (event.getKey().equals("startButton")) {
+            pluginStarted = true;
+        } else if (event.getKey().equals("stopButton")) {
+            pluginStarted = false;
+        }
+    }
 
-			for (int i = 0; i < randDelay; i++)
-			{
-				entryList.add(waitEntry);
-			}
-		}
-		click();
-	}
-
-	@Nullable
-	public GameObject findNearestGameObject(int... ids)
-	{
-		assert client.isClientThread();
-
-		if (client.getLocalPlayer() == null)
-		{
-			return null;
-		}
-
-		return new GameObjectQuery()
-			.idEquals(ids)
-			.result(client)
-			.nearestTo(client.getLocalPlayer());
-	}
-
-	@Provides
-	ItemUserConfig provideConfig(final ConfigManager configManager)
-	{
-		return configManager.getConfig(ItemUserConfig.class);
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (entryList != null && !entryList.isEmpty())
-		{
-			event.setMenuEntry(entryList.poll());
-
-			if (entryList == null || entryList.isEmpty())
-			{
-				return;
-			}
-
-			click();
-		}
-	}
-
-	public void click()
-	{
-		Point pos = client.getMouseCanvasPosition();
-
-		if (client.isStretchedEnabled())
-		{
-			final Dimension stretched = client.getStretchedDimensions();
-			final Dimension real = client.getRealDimensions();
-			final double width = (stretched.width / real.getWidth());
-			final double height = (stretched.height / real.getHeight());
-			final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			return;
-		}
-
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-	}
+    public int getRandomWait() {
+        return (int) ((Math.random() * (config.waitMax() - config.waitMin())) + config.waitMin());
+    }
 }

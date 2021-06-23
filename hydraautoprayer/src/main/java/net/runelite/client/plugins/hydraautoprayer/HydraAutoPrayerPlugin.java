@@ -25,301 +25,221 @@
  */
 package net.runelite.client.plugins.hydraautoprayer;
 
-import java.awt.Dimension;
-import java.awt.event.MouseEvent;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.runelite.api.Actor;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.MenuOpcode;
-import net.runelite.api.NPC;
-import net.runelite.api.Point;
-import net.runelite.api.Prayer;
-import net.runelite.api.Skill;
-import net.runelite.api.events.AnimationChanged;
-import net.runelite.api.events.ClientTick;
-import net.runelite.api.events.InteractingChanged;
-import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.NpcDespawned;
-import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.*;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.PluginType;
 import org.pf4j.Extension;
+
+import javax.inject.Inject;
+import java.util.*;
 
 @Extension
 @PluginDescriptor(
-	name = "Hydra Auto Prayer",
-	enabledByDefault = false,
-	description = "Swaps prayer for hydra",
-	tags = {"hydra", "helper", "baby", "small", "normal", "regular", "auto", "prayer", "swapper", "ben93riggs"},
-	type = PluginType.PVM
+        name = "Hydra Auto Prayer",
+        enabledByDefault = false,
+        description = "Swaps prayer for hydra",
+        tags = {"hydra", "helper", "baby", "small", "normal", "regular", "auto", "prayer", "swapper", "ben93riggs"},
+        hidden = true
 )
-public class HydraAutoPrayerPlugin extends Plugin
-{
-	static final Set<HydraAnimation> VALID_HYDRA_ANIMATIONS = EnumSet.of(HydraAnimation.RANGE, HydraAnimation.MAGIC);
+public class HydraAutoPrayerPlugin extends Plugin {
+    static final Set<HydraAnimation> VALID_HYDRA_ANIMATIONS = EnumSet.of(HydraAnimation.RANGE, HydraAnimation.MAGIC);
 
-	private static final String NPC_NAME_HYDRA = "Hydra";
+    private static final String NPC_NAME_HYDRA = "Hydra";
 
-	private MenuEntry entry = null;
+    @Inject
+    private Client client;
 
-	@Inject
-	private Client client;
+    @Inject
+    private ClientThread clientThread;
 
-	private final Map<Integer, Hydra> hydras = new HashMap<>();
+    private final Map<Integer, Hydra> hydras = new HashMap<>();
 
-	@Getter(AccessLevel.PACKAGE)
-	private NPC interactingNpc = null;
+    @Getter(AccessLevel.PACKAGE)
+    private NPC interactingNpc = null;
 
-	@Override
-	protected void startUp()
-	{
-		resetHydras();
-	}
+    @Override
+    protected void startUp() {
+        resetHydras();
+    }
 
-	@Override
-	protected void shutDown()
-	{
-		resetHydras();
-	}
+    @Override
+    protected void shutDown() {
+        resetHydras();
+    }
 
-	@Subscribe
-	private void onNpcSpawned(final NpcSpawned event)
-	{
-		final NPC npc = event.getNpc();
+    @Subscribe
+    private void onNpcSpawned(final NpcSpawned event) {
+        final NPC npc = event.getNpc();
 
-		if (isActorHydra(npc))
-		{
-			addHydra(npc);
-		}
-	}
+        if (isActorHydra(npc)) {
+            addHydra(npc);
+        }
+    }
 
-	@Subscribe
-	private void onNpcDespawned(final NpcDespawned event)
-	{
-		final NPC npc = event.getNpc();
+    @Subscribe
+    private void onNpcDespawned(final NpcDespawned event) {
+        final NPC npc = event.getNpc();
 
-		if (isActorHydra(npc))
-		{
-			removeHydra(npc);
-		}
-	}
+        if (isActorHydra(npc)) {
+            removeHydra(npc);
+        }
+    }
 
-	@Subscribe
-	private void onInteractingChanged(final InteractingChanged event)
-	{
-		final Actor source = event.getSource();
+    @Subscribe
+    private void onInteractingChanged(final InteractingChanged event) {
+        final Actor source = event.getSource();
 
-		if (!isActorHydra(source))
-		{
-			return;
-		}
+        if (!isActorHydra(source)) {
+            return;
+        }
 
-		final NPC npc = (NPC) source;
+        final NPC npc = (NPC) source;
 
-		addHydra(npc);
-		updateInteractingNpc(npc);
-	}
+        addHydra(npc);
+        updateInteractingNpc(npc);
+    }
 
-	@Subscribe
-	private void onAnimationChanged(final AnimationChanged event)
-	{
-		final Actor actor = event.getActor();
+    @Subscribe
+    private void onAnimationChanged(final AnimationChanged event) {
+        final Actor actor = event.getActor();
 
-		if (!isActorHydra(actor))
-		{
-			return;
-		}
+        if (!isActorHydra(actor)) {
+            return;
+        }
 
-		final NPC npc = (NPC) event.getActor();
+        final NPC npc = (NPC) event.getActor();
 
-		addHydra(npc);
-		updateInteractingNpc(npc);
+        addHydra(npc);
+        updateInteractingNpc(npc);
 
-		HydraAnimation hydraAnimation;
+        HydraAnimation hydraAnimation;
 
-		try
-		{
-			hydraAnimation = HydraAnimation.fromId(npc.getAnimation());
-		}
-		catch (final IllegalArgumentException e)
-		{
-			hydraAnimation = null;
-		}
+        try {
+            hydraAnimation = HydraAnimation.fromId(npc.getAnimation());
+        } catch (final IllegalArgumentException e) {
+            hydraAnimation = null;
+        }
 
-		if (hydraAnimation == null || !VALID_HYDRA_ANIMATIONS.contains(hydraAnimation))
-		{
-			// If the animation is not range/magic then do nothing.
-			return;
-		}
+        if (hydraAnimation == null || !VALID_HYDRA_ANIMATIONS.contains(hydraAnimation)) {
+            // If the animation is not range/magic then do nothing.
+            return;
+        }
 
-		final Hydra hydra = hydras.get(npc.getIndex());
+        final Hydra hydra = hydras.get(npc.getIndex());
 
-		if (hydra.getHydraAnimation() == null)
-		{
-			// If this is the first observed animation then set it
-			hydra.setHydraAnimation(hydraAnimation);
-		}
-		else
-		{
-			if (!Objects.equals(hydra.getHydraAnimation(), hydraAnimation))
-			{
-				// If the animation switched from range/magic then set it and reset attack count
-				hydra.setHydraAnimation(hydraAnimation);
-				hydra.resetAttackCount();
-			}
-		}
+        if (hydra.getHydraAnimation() == null) {
+            // If this is the first observed animation then set it
+            hydra.setHydraAnimation(hydraAnimation);
+        } else {
+            if (!Objects.equals(hydra.getHydraAnimation(), hydraAnimation)) {
+                // If the animation switched from range/magic then set it and reset attack count
+                hydra.setHydraAnimation(hydraAnimation);
+                hydra.resetAttackCount();
+            }
+        }
 
-		hydra.updateAttackCount();
-	}
+        hydra.updateAttackCount();
+    }
 
-	@Subscribe
-	private void onClientTick(final ClientTick event)
-	{
-		if (client.getGameState() != GameState.LOGGED_IN)
-		{
-			return;
-		}
+    @Subscribe
+    private void onClientTick(final ClientTick event) {
+        if (client.getGameState() != GameState.LOGGED_IN) {
+            return;
+        }
 
-		if (interactingNpc == null)
-		{
-			return;
-		}
+        if (interactingNpc == null) {
+            return;
+        }
 
-		final Hydra hydra = hydras.get(interactingNpc.getIndex());
+        final Hydra hydra = hydras.get(interactingNpc.getIndex());
 
-		final boolean attackCountIsMax = hydra.getAttackCount() == Hydra.MAX_ATTACK_COUNT;
+        final boolean attackCountIsMax = hydra.getAttackCount() == Hydra.MAX_ATTACK_COUNT;
 
-		switch(hydra.getHydraAnimation())
-		{
-			case RANGE:
-				activatePrayer(attackCountIsMax ? HydraAnimation.MAGIC.getPrayer() : HydraAnimation.RANGE.getPrayer());
-			case MAGIC:
-				activatePrayer(attackCountIsMax ? HydraAnimation.RANGE.getPrayer() : HydraAnimation.MAGIC.getPrayer());
-			default:
-				break;
-		}
+        switch (hydra.getHydraAnimation()) {
+            case RANGE:
+                activatePrayer(attackCountIsMax ? HydraAnimation.MAGIC.getPrayer() : HydraAnimation.RANGE.getPrayer());
+            case MAGIC:
+                activatePrayer(attackCountIsMax ? HydraAnimation.RANGE.getPrayer() : HydraAnimation.MAGIC.getPrayer());
+            default:
+                break;
+        }
+    }
 
+    private static boolean isActorHydra(final Actor actor) {
+        return Objects.equals(actor.getName(), NPC_NAME_HYDRA);
+    }
 
-	}
+    private void updateInteractingNpc(final NPC npc) {
+        if (!Objects.equals(interactingNpc, npc) && Objects.equals(npc.getInteracting(), client.getLocalPlayer())) {
+            interactingNpc = npc;
+        }
+    }
 
-	private static boolean isActorHydra(final Actor actor)
-	{
-		return Objects.equals(actor.getName(), NPC_NAME_HYDRA);
-	}
+    private void addHydra(final NPC npc) {
+        final int npcIndex = npc.getIndex();
 
-	private void updateInteractingNpc(final NPC npc)
-	{
-		if (!Objects.equals(interactingNpc, npc) && Objects.equals(npc.getInteracting(), client.getLocalPlayer()))
-		{
-			interactingNpc = npc;
-		}
-	}
+        if (!hydras.containsKey(npcIndex)) {
+            hydras.put(npcIndex, new Hydra(npc));
+        }
+    }
 
-	private void addHydra(final NPC npc)
-	{
-		final int npcIndex = npc.getIndex();
+    private void removeHydra(final NPC npc) {
+        final int npcIndex = npc.getIndex();
 
-		if (!hydras.containsKey(npcIndex))
-		{
-			hydras.put(npcIndex, new Hydra(npc));
-		}
-	}
+        hydras.remove(npcIndex);
 
-	private void removeHydra(final NPC npc)
-	{
-		final int npcIndex = npc.getIndex();
+        if (Objects.equals(interactingNpc, npc)) {
+            interactingNpc = null;
+        }
+    }
 
-		hydras.remove(npcIndex);
+    private void resetHydras() {
+        hydras.clear();
+        interactingNpc = null;
+    }
 
-		if (Objects.equals(interactingNpc, npc))
-		{
-			interactingNpc = null;
-		}
-	}
+    public void activatePrayer(Prayer prayer) {
+        if (prayer == null) {
+            return;
+        }
 
-	private void resetHydras()
-	{
-		hydras.clear();
-		interactingNpc = null;
-	}
+        //check if prayer is already active this tick
+        if (client.isPrayerActive(prayer)) {
+            return;
+        }
 
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (entry != null)
-		{
-			event.setMenuEntry(entry);
-		}
-		entry = null;
-	}
+        WidgetInfo widgetInfo = prayer.getWidgetInfo();
 
-	public void activatePrayer(Prayer prayer)
-	{
-		if (prayer == null)
-		{
-			return;
-		}
+        if (widgetInfo == null) {
+            return;
+        }
 
-		//check if prayer is already active this tick
-		if (client.isPrayerActive(prayer))
-		{
-			return;
-		}
+        Widget prayer_widget = client.getWidget(widgetInfo);
 
-		WidgetInfo widgetInfo = prayer.getWidgetInfo();
+        if (prayer_widget == null) {
+            return;
+        }
 
-		if (widgetInfo == null)
-		{
-			return;
-		}
+        if (client.getBoostedSkillLevel(Skill.PRAYER) <= 0) {
+            return;
+        }
 
-		Widget prayer_widget = client.getWidget(widgetInfo);
-
-		if (prayer_widget == null)
-		{
-			return;
-		}
-
-		if (client.getBoostedSkillLevel(Skill.PRAYER) <= 0)
-		{
-			return;
-		}
-
-		entry = new MenuEntry("Activate", prayer_widget.getName(), 1, MenuOpcode.CC_OP.getId(), prayer_widget.getItemId(), prayer_widget.getId(), false);
-		click();
-	}
-
-	public void click()
-	{
-		Point pos = client.getMouseCanvasPosition();
-
-		if (client.isStretchedEnabled())
-		{
-			final Dimension stretched = client.getStretchedDimensions();
-			final Dimension real = client.getRealDimensions();
-			final double width = (stretched.width / real.getWidth());
-			final double height = (stretched.height / real.getHeight());
-			final Point point = new Point((int) (pos.getX() * width), (int) (pos.getY() * height));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, point.getX(), point.getY(), 1, false, 1));
-			return;
-		}
-
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 501, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 502, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-		client.getCanvas().dispatchEvent(new MouseEvent(client.getCanvas(), 500, System.currentTimeMillis(), 0, pos.getX(), pos.getY(), 1, false, 1));
-	}
+        clientThread.invoke(() ->
+                client.invokeMenuAction(
+                        "Activate",
+                        prayer_widget.getName(),
+                        1,
+                        MenuAction.CC_OP.getId(),
+                        prayer_widget.getItemId(),
+                        prayer_widget.getId()
+                )
+        );
+    }
 }

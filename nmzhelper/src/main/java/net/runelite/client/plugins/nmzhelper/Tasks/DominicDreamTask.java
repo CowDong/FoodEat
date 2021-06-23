@@ -56,7 +56,7 @@ public class DominicDreamTask extends Task {
 
 
         //DIALOG_OPTION_OPTION1[0] == Which dream would you like to experience?
-        Widget dialogOption1Widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
+        Widget dialogOption1Widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 
         if (dialogOption1Widget != null && !dialogOption1Widget.isHidden()) {
             return false;

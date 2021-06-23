@@ -100,13 +100,8 @@ public class ContinueClickerPlugin extends Plugin {
             return widget;
         }
 
+        //WidgetInfo.DIALOG_PLAYER_CONTINUE
         widget = client.getWidget(231, 4);
-
-        if (widget != null && !widget.isHidden()) {
-            return widget;
-        }
-
-        widget = client.getWidget(WidgetInfo.DIALOG_PLAYER_CONTINUE);
 
         if (widget != null && !widget.isHidden()) {
             return widget;

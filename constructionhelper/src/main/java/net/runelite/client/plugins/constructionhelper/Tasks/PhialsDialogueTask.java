@@ -33,7 +33,7 @@ public class PhialsDialogueTask extends Task {
             return false;
         }
 
-        Widget dialogueWidget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
+        Widget dialogueWidget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 
         if (dialogueWidget == null) {
             return false;
@@ -62,7 +62,7 @@ public class PhialsDialogueTask extends Task {
             return;
         }
 
-        Widget dialogueWidget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
+        Widget dialogueWidget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 
         if (dialogueWidget == null) {
             return;

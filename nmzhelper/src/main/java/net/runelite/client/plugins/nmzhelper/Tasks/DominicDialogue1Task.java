@@ -25,7 +25,7 @@ public class DominicDialogue1Task extends Task {
         }
 
         //DIALOG_OPTION_OPTION1[0] == Which dream would you like to experience?
-        Widget chatTitleParent = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTION1);
+        Widget chatTitleParent = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 
         if (chatTitleParent != null && !chatTitleParent.isHidden()) {
             Widget chatTitleChild = chatTitleParent.getChild(0);

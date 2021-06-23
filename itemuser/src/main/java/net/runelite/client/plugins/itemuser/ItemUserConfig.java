@@ -1,11 +1,9 @@
 package net.runelite.client.plugins.itemuser;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import net.runelite.client.config.Button;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Keybind;
 
 @ConfigGroup("itemuser")
 public interface ItemUserConfig extends Config
@@ -34,17 +32,6 @@ public interface ItemUserConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "useItemsKeybind",
-		name = "Use Keybind",
-		description = "The keybind to use the items",
-		position = 2
-	)
-	default Keybind useItemsKeybind()
-	{
-		return new Keybind(KeyEvent.VK_U, InputEvent.CTRL_DOWN_MASK);
-	}
-
-	@ConfigItem(
 		keyName = "waitMin",
 		name = "Delay Min",
 		description = "Minimum time to delay",
@@ -59,4 +46,23 @@ public interface ItemUserConfig extends Config
 		position = 5
 	)
 	default int waitMax() { return 30; }
+
+	@ConfigItem(keyName = "startButton",
+			name = "Start",
+			description = "",
+			position = 12
+	)
+	default Button startButton() {
+		return new Button();
+	}
+
+	@ConfigItem(
+			keyName = "stopButton",
+			name = "Stop",
+			description = "",
+			position = 13
+	)
+	default Button stopButton() {
+		return new Button();
+	}
 }

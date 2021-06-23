@@ -1,9 +1,6 @@
 package net.runelite.client.plugins.itemcombiner;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Keybind;
+import net.runelite.client.config.*;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -35,21 +32,10 @@ public interface ItemCombinerConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "useItemsKeybind",
-		name = "Use Keybind",
-		description = "The keybind to use the items",
-		position = 2
-	)
-	default Keybind useItemsKeybind()
-	{
-		return new Keybind(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK);
-	}
-
-	@ConfigItem(
 		keyName = "iterations",
 		name = "Iterations",
 		description = "The amount of times to perform the action",
-		position = 3
+		position = 2
 	)
 	default int iterations()
 	{
@@ -59,16 +45,35 @@ public interface ItemCombinerConfig extends Config
 	@ConfigItem(
 			keyName = "waitMin",
 			name = "Delay Min",
-			description = "Minimum time to delay",
-			position = 4
+			description = "Minimum frames to delay",
+			position = 3
 	)
-	default int waitMin() { return 5; }
+	default int waitMin() { return 2; }
 
 	@ConfigItem(
 			keyName = "waitMax",
 			name = "Delay Max",
-			description = "Maximum time to delay",
-			position = 5
+			description = "Maximum frames to delay",
+			position = 4
 	)
 	default int waitMax() { return 30; }
+
+	@ConfigItem(keyName = "startButton",
+			name = "Start",
+			description = "",
+			position = 12
+	)
+	default Button startButton() {
+		return new Button();
+	}
+
+	@ConfigItem(
+			keyName = "stopButton",
+			name = "Stop",
+			description = "",
+			position = 13
+	)
+	default Button stopButton() {
+		return new Button();
+	}
 }
