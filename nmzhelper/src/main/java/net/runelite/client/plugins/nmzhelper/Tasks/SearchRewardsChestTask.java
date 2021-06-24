@@ -39,9 +39,10 @@ public class SearchRewardsChestTask extends Task {
             return false;
 
         //has absorptions && has overloads
-        if (getAbsorptionDoseCount() >= config.absorptionDoses() &&
-                getOverloadDoseCount() >= config.overloadDoses())
+        if (getAbsorptionDoseCount() + client.getVarbitValue(3954) >= config.absorptionDoses() &&
+                getOverloadDoseCount() + client.getVarbitValue(3953) >= config.overloadDoses()) {
             return false;
+        }
 
         //get the game object
         QueryResults<GameObject> results = new GameObjectQuery()
@@ -109,8 +110,10 @@ public class SearchRewardsChestTask extends Task {
 
         List<WidgetItem> result = inventoryWidget.getWidgetItems()
                 .stream()
-                .filter(item -> Arrays.asList(ItemID.ABSORPTION_1, ItemID.ABSORPTION_2,
-                        ItemID.ABSORPTION_3, ItemID.ABSORPTION_4).contains(item.getId()))
+                .filter(item ->
+                        Arrays.asList(ItemID.ABSORPTION_1, ItemID.ABSORPTION_2,
+                                ItemID.ABSORPTION_3, ItemID.ABSORPTION_4)
+                                .contains(item.getId()))
                 .collect(Collectors.toList());
 
         if (result.isEmpty())
@@ -133,8 +136,9 @@ public class SearchRewardsChestTask extends Task {
 
         List<WidgetItem> result = inventoryWidget.getWidgetItems()
                 .stream()
-                .filter(item -> Arrays.asList(ItemID.OVERLOAD_1, ItemID.OVERLOAD_2,
-                        ItemID.OVERLOAD_3, ItemID.OVERLOAD_4)
+                .filter(item ->
+                        Arrays.asList(ItemID.OVERLOAD_1, ItemID.OVERLOAD_2,
+                                ItemID.OVERLOAD_3, ItemID.OVERLOAD_4)
                         .contains(item.getId()))
                 .collect(Collectors.toList());
 

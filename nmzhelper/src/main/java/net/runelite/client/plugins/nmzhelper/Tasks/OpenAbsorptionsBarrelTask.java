@@ -39,11 +39,7 @@ public class OpenAbsorptionsBarrelTask extends Task {
         }
 
         //if we have enough absorption doses in storage already
-        if (client.getVarbitValue(3954) < config.absorptionDoses())
-            return false;
-
-        //if we have enough overload doses in storage already
-        if (client.getVarbitValue(3953) < config.overloadDoses())
+        if (client.getVarbitValue(3954) + getDoseCount() < config.absorptionDoses())
             return false;
 
         //already have absorptions

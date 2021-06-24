@@ -27,8 +27,11 @@ import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Executors;
 
 @Singleton
 @Extension
@@ -96,6 +99,9 @@ public class NMZHelperPlugin extends Plugin {
 
     boolean pluginStarted;
 
+    private final Random random = new Random();
+    private long randomDelay;
+
     @Provides
     NMZHelperConfig provideConfig(final ConfigManager configManager) {
         return configManager.getConfig(NMZHelperConfig.class);
@@ -114,6 +120,7 @@ public class NMZHelperPlugin extends Plugin {
         status = "initializing...";
         tasks.clear();
         tasks.addAll(this, client, clientThread, config, taskClassList);
+        randomDelay = randomDelay();
     }
 
     @Override
@@ -172,6 +179,15 @@ public class NMZHelperPlugin extends Plugin {
 
         if (client.getGameState() != GameState.LOGGED_IN) {
             return;
+        }
+
+        if (checkIdleLogout()) {
+            randomDelay = randomDelay();
+            Executors.newSingleThreadExecutor()
+                    .submit(this::pressKey);
+
+            client.setKeyboardIdleTicks(0);
+            client.setMouseIdleTicks(0);
         }
 
         //if we don't have a rock cake, return...may need to stop the plugin but this is causing it to stop
@@ -238,5 +254,36 @@ public class NMZHelperPlugin extends Plugin {
 
         if (reason != null && !reason.isEmpty())
             sendGameMessage("NMZHelper Stopped: " + reason);
+    }
+
+    private boolean checkIdleLogout() {
+        int idleClientTicks = client.getKeyboardIdleTicks();
+
+        if (client.getMouseIdleTicks() < idleClientTicks) {
+            idleClientTicks = client.getMouseIdleTicks();
+        }
+
+        return idleClientTicks >= randomDelay;
+    }
+
+    private long randomDelay() {
+        return (long) clamp(
+                Math.round(random.nextGaussian() * 8000)
+        );
+    }
+
+    private static double clamp(double val) {
+        return Math.max(1, Math.min(13000, val));
+    }
+
+    private void pressKey() {
+        int key = client.getTickCount() % 2 == 1 ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT;
+
+        KeyEvent keyPress = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, key);
+        this.client.getCanvas().dispatchEvent(keyPress);
+        KeyEvent keyRelease = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key);
+        this.client.getCanvas().dispatchEvent(keyRelease);
+        KeyEvent keyTyped = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_TYPED, System.currentTimeMillis(), 0, key);
+        this.client.getCanvas().dispatchEvent(keyTyped);
     }
 }

@@ -37,12 +37,8 @@ public class WithdrawAbsorptionTask extends Task {
             return false;
         }
 
-        //if we have enough absorption doses in storage already
-        if (client.getVarbitValue(3954) < config.absorptionDoses())
-            return false;
-
-        //if we have enough overload doses in storage already
-        if (client.getVarbitValue(3953) < config.overloadDoses())
+        //if we dont have enough absorptions doses to continue
+        if (client.getVarbitValue(3954) + getDoseCount() < config.absorptionDoses())
             return false;
 
         //already have overloads
