@@ -23,7 +23,6 @@ public class StopConditionTask extends Task {
 
     @Override
     public boolean validate() {
-
         QueryResults<WidgetItem> sawResults = new InventoryWidgetItemQuery()
                 .idEquals(ItemID.SAW, ItemID.CRYSTAL_SAW)
                 .result(client);
@@ -109,6 +108,99 @@ public class StopConditionTask extends Task {
 
     @Override
     public void onGameTick(GameTick event) {
-        plugin.stopPlugin("Stop condition met!");
+
+        QueryResults<WidgetItem> sawResults = new InventoryWidgetItemQuery()
+                .idEquals(ItemID.SAW, ItemID.CRYSTAL_SAW)
+                .result(client);
+
+        if (sawResults == null || sawResults.isEmpty()) {
+            plugin.stopPlugin("Saw not found. (query)");
+            return;
+        }
+
+        WidgetItem sawWidget = sawResults.first();
+
+        if (sawWidget == null) {
+            plugin.stopPlugin("Saw not found. (first)");
+            return;
+        }
+
+        QueryResults<WidgetItem> hammerResults = new InventoryWidgetItemQuery()
+                .idEquals(ItemID.HAMMER)
+                .result(client);
+
+        if (hammerResults == null || hammerResults.isEmpty()) {
+            plugin.stopPlugin("Hammer not found. (query)");
+            return;
+        }
+
+        WidgetItem hammerWidget = hammerResults.first();
+
+        if (hammerWidget == null) {
+            plugin.stopPlugin("Hammer not found. (first)");
+            return;
+        }
+
+        for (int req : config.mode().getOtherReqs()) {
+            QueryResults<WidgetItem> reqResults = new InventoryWidgetItemQuery()
+                    .idEquals(req)
+                    .result(client);
+
+            if (reqResults == null || reqResults.isEmpty()) {
+                plugin.stopPlugin("Missing requirement (query): " + client.getItemDefinition(req).getName());
+                return;
+            }
+
+            WidgetItem reqWidget = reqResults.first();
+
+            if (reqWidget == null) {
+                plugin.stopPlugin("Missing requirement (first): " + client.getItemDefinition(req).getName());
+                return;
+            }
+        }
+
+        QueryResults<WidgetItem> results = new InventoryWidgetItemQuery()
+                .idEquals(config.mode().getPlankId() + 1) //noted plank is plankId + 1
+                .result(client);
+
+        if (results == null || results.isEmpty()) {
+            plugin.stopPlugin("Out of noted planks. (first)");
+            return;
+        }
+
+        WidgetItem notedPlanks = results.first();
+
+        if (notedPlanks == null) {
+            plugin.stopPlugin("Out of noted planks. (query)");
+            return;
+        }
+
+        if (notedPlanks.getQuantity() < config.mode().getPlankCost()) {
+            plugin.stopPlugin("Less noted planks than required for crafting target object.");
+            return;
+        }
+
+        QueryResults<WidgetItem> gpResults = new InventoryWidgetItemQuery()
+                .idEquals(ItemID.COINS_995)
+                .result(client);
+
+        if (gpResults == null || gpResults.isEmpty()) {
+            plugin.stopPlugin("GP not found. (query)");
+            return;
+        }
+
+        WidgetItem gp = gpResults.first();
+
+        if (gp == null) {
+            plugin.stopPlugin("GP not found (first)");
+            return;
+        }
+
+        if (gp.getQuantity() < 1000) {
+            plugin.stopPlugin("GP < 1000");
+            return;
+        }
+
+        plugin.stopPlugin("Stop condition met (unspecified).");
     }
 }

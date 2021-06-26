@@ -158,6 +158,6 @@ public class ConstructionHelperPlugin extends Plugin {
         pluginStarted = false;
 
         if (reason != null && !reason.isEmpty())
-            sendGameMessage("NMZHelper Stopped: " + reason);
+            sendGameMessage("ConstructionHelper Stopped: " + reason);
     }
 }
