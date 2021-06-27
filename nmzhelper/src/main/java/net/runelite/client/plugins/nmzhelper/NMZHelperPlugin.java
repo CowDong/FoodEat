@@ -99,9 +99,6 @@ public class NMZHelperPlugin extends Plugin {
 
     boolean pluginStarted;
 
-    private final Random random = new Random();
-    private long randomDelay;
-
     @Provides
     NMZHelperConfig provideConfig(final ConfigManager configManager) {
         return configManager.getConfig(NMZHelperConfig.class);
@@ -114,17 +111,16 @@ public class NMZHelperPlugin extends Plugin {
     public static int rockCakeDelay = 0;
 
     @Override
-    protected void startUp() throws Exception {
+    protected void startUp() {
         pluginStarted = false;
         overlayManager.add(overlay);
         status = "initializing...";
         tasks.clear();
         tasks.addAll(this, client, clientThread, config, taskClassList);
-        randomDelay = randomDelay();
     }
 
     @Override
-    protected void shutDown() throws Exception {
+    protected void shutDown() {
         pluginStarted = false;
         overlayManager.remove(overlay);
         tasks.clear();
@@ -181,11 +177,8 @@ public class NMZHelperPlugin extends Plugin {
             return;
         }
 
-        if (checkIdleLogout()) {
-            randomDelay = randomDelay();
-            Executors.newSingleThreadExecutor()
-                    .submit(this::pressKey);
-
+        if (getIdleTicks()) {
+            pressKey();
             client.setKeyboardIdleTicks(0);
             client.setMouseIdleTicks(0);
         }
@@ -256,34 +249,22 @@ public class NMZHelperPlugin extends Plugin {
             sendGameMessage("NMZHelper Stopped: " + reason);
     }
 
-    private boolean checkIdleLogout() {
+    private boolean getIdleTicks() {
         int idleClientTicks = client.getKeyboardIdleTicks();
 
-        if (client.getMouseIdleTicks() < idleClientTicks) {
+        if (client.getMouseIdleTicks() > idleClientTicks) {
             idleClientTicks = client.getMouseIdleTicks();
         }
 
-        return idleClientTicks >= randomDelay;
-    }
-
-    private long randomDelay() {
-        return (long) clamp(
-                Math.round(random.nextGaussian() * 8000)
-        );
-    }
-
-    private static double clamp(double val) {
-        return Math.max(1, Math.min(13000, val));
+        return idleClientTicks > 12500;
     }
 
     private void pressKey() {
         int key = client.getTickCount() % 2 == 1 ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT;
 
-        KeyEvent keyPress = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, key);
+        KeyEvent keyPress = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
         this.client.getCanvas().dispatchEvent(keyPress);
-        KeyEvent keyRelease = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key);
+        KeyEvent keyRelease = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
         this.client.getCanvas().dispatchEvent(keyRelease);
-        KeyEvent keyTyped = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_TYPED, System.currentTimeMillis(), 0, key);
-        this.client.getCanvas().dispatchEvent(keyTyped);
     }
 }
