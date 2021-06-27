@@ -1,45 +1,26 @@
-/*
- * Copyright (c) 2018, https://openosrs.com
- * Copyright (c) 2020, Dutta64 <https://github.com/dutta64>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package net.runelite.client.plugins.hydraautoprayer;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import net.runelite.api.*;
-import net.runelite.api.events.*;
+import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.hydraautoprayer.entity.Hydra;
+import net.runelite.client.plugins.hydraautoprayer.entity.HydraPhase;
 import org.pf4j.Extension;
 
 import javax.inject.Inject;
-import java.util.*;
+import javax.inject.Singleton;
+import java.util.Arrays;
 
+@Singleton
 @Extension
 @PluginDescriptor(
         name = "Hydra Auto Prayer",
@@ -49,9 +30,7 @@ import java.util.*;
         hidden = true
 )
 public class HydraAutoPrayerPlugin extends Plugin {
-    static final Set<HydraAnimation> VALID_HYDRA_ANIMATIONS = EnumSet.of(HydraAnimation.RANGE, HydraAnimation.MAGIC);
-
-    private static final String NPC_NAME_HYDRA = "Hydra";
+    private static final int[] HYDRA_REGIONS = {5279, 5280, 5535, 5536};
 
     @Inject
     private Client client;
@@ -59,150 +38,134 @@ public class HydraAutoPrayerPlugin extends Plugin {
     @Inject
     private ClientThread clientThread;
 
-    private final Map<Integer, Hydra> hydras = new HashMap<>();
+    private boolean atHydra;
 
-    @Getter(AccessLevel.PACKAGE)
-    private NPC interactingNpc = null;
+    @Getter
+    private Hydra hydra;
+
+    public static final int HYDRA_1_1 = 8237;
+    public static final int HYDRA_1_2 = 8238;
+    public static final int HYDRA_2_1 = 8244;
+    public static final int HYDRA_2_2 = 8245;
+    public static final int HYDRA_3_1 = 8251;
+    public static final int HYDRA_3_2 = 8252;
+    public static final int HYDRA_4_1 = 8257;
+    public static final int HYDRA_4_2 = 8258;
+
+    private int lastAttackTick = -1;
 
     @Override
     protected void startUp() {
-        resetHydras();
+        if (client.getGameState() == GameState.LOGGED_IN && isInHydraRegion()) {
+            init();
+        }
+    }
+
+    private void init() {
+        atHydra = true;
+
+        for (final NPC npc : client.getNpcs()) {
+            onNpcSpawned(new NpcSpawned(npc));
+        }
     }
 
     @Override
     protected void shutDown() {
-        resetHydras();
+        atHydra = false;
+
+        hydra = null;
+        lastAttackTick = -1;
+    }
+
+    @Subscribe
+    private void onGameStateChanged(final GameStateChanged event) {
+        final GameState gameState = event.getGameState();
+
+        switch (gameState) {
+            case LOGGED_IN:
+                if (isInHydraRegion()) {
+                    if (!atHydra) {
+                        init();
+                    }
+                } else {
+                    if (atHydra) {
+                        shutDown();
+                    }
+                }
+                break;
+            case HOPPING:
+            case LOGIN_SCREEN:
+                if (atHydra) {
+                    shutDown();
+                }
+            default:
+                break;
+        }
     }
 
     @Subscribe
     private void onNpcSpawned(final NpcSpawned event) {
         final NPC npc = event.getNpc();
 
-        if (isActorHydra(npc)) {
-            addHydra(npc);
+        if (npc.getId() == NpcID.ALCHEMICAL_HYDRA) {
+            hydra = new Hydra(npc);
         }
-    }
-
-    @Subscribe
-    private void onNpcDespawned(final NpcDespawned event) {
-        final NPC npc = event.getNpc();
-
-        if (isActorHydra(npc)) {
-            removeHydra(npc);
-        }
-    }
-
-    @Subscribe
-    private void onInteractingChanged(final InteractingChanged event) {
-        final Actor source = event.getSource();
-
-        if (!isActorHydra(source)) {
-            return;
-        }
-
-        final NPC npc = (NPC) source;
-
-        addHydra(npc);
-        updateInteractingNpc(npc);
     }
 
     @Subscribe
     private void onAnimationChanged(final AnimationChanged event) {
         final Actor actor = event.getActor();
 
-        if (!isActorHydra(actor)) {
+        if (hydra == null || actor != hydra.getNpc()) {
             return;
         }
 
-        final NPC npc = (NPC) event.getActor();
+        final HydraPhase phase = hydra.getPhase();
 
-        addHydra(npc);
-        updateInteractingNpc(npc);
+        final int animationId = actor.getAnimation();
 
-        HydraAnimation hydraAnimation;
-
-        try {
-            hydraAnimation = HydraAnimation.fromId(npc.getAnimation());
-        } catch (final IllegalArgumentException e) {
-            hydraAnimation = null;
-        }
-
-        if (hydraAnimation == null || !VALID_HYDRA_ANIMATIONS.contains(hydraAnimation)) {
-            // If the animation is not range/magic then do nothing.
-            return;
-        }
-
-        final Hydra hydra = hydras.get(npc.getIndex());
-
-        if (hydra.getHydraAnimation() == null) {
-            // If this is the first observed animation then set it
-            hydra.setHydraAnimation(hydraAnimation);
-        } else {
-            if (!Objects.equals(hydra.getHydraAnimation(), hydraAnimation)) {
-                // If the animation switched from range/magic then set it and reset attack count
-                hydra.setHydraAnimation(hydraAnimation);
-                hydra.resetAttackCount();
+        if ((animationId == phase.getDeathAnimation2() && phase != HydraPhase.FLAME)
+                || (animationId == phase.getDeathAnimation1() && phase == HydraPhase.FLAME)) {
+            switch (phase) {
+                case POISON:
+                    hydra.changePhase(HydraPhase.LIGHTNING);
+                    break;
+                case LIGHTNING:
+                    hydra.changePhase(HydraPhase.FLAME);
+                    break;
+                case FLAME:
+                    hydra.changePhase(HydraPhase.ENRAGED);
+                    break;
+                case ENRAGED:
+                    // NpcDespawned event does not fire for Hydra inbetween kills; must use death animation.
+                    hydra = null;
+                    break;
             }
         }
-
-        hydra.updateAttackCount();
     }
 
     @Subscribe
-    private void onClientTick(final ClientTick event) {
-        if (client.getGameState() != GameState.LOGGED_IN) {
+    private void onProjectileMoved(final ProjectileMoved event) {
+        final Projectile projectile = event.getProjectile();
+
+        if (hydra == null || client.getGameCycle() >= projectile.getStartMovementCycle()) {
             return;
         }
 
-        if (interactingNpc == null) {
-            return;
+        final int projectileId = projectile.getId();
+
+        if (client.getTickCount() != lastAttackTick
+                && (projectileId == Hydra.AttackStyle.MAGIC.getProjectileID() || projectileId == Hydra.AttackStyle.RANGED.getProjectileID())) {
+            hydra.handleProjectile(projectileId);
+
+            lastAttackTick = client.getTickCount();
         }
 
-        final Hydra hydra = hydras.get(interactingNpc.getIndex());
-
-        final boolean attackCountIsMax = hydra.getAttackCount() == Hydra.MAX_ATTACK_COUNT;
-
-        switch (hydra.getHydraAnimation()) {
-            case RANGE:
-                activatePrayer(attackCountIsMax ? HydraAnimation.MAGIC.getPrayer() : HydraAnimation.RANGE.getPrayer());
-            case MAGIC:
-                activatePrayer(attackCountIsMax ? HydraAnimation.RANGE.getPrayer() : HydraAnimation.MAGIC.getPrayer());
-            default:
-                break;
-        }
+        activatePrayer(hydra.getNextAttack().getPrayer());
     }
 
-    private static boolean isActorHydra(final Actor actor) {
-        return Objects.equals(actor.getName(), NPC_NAME_HYDRA);
-    }
-
-    private void updateInteractingNpc(final NPC npc) {
-        if (!Objects.equals(interactingNpc, npc) && Objects.equals(npc.getInteracting(), client.getLocalPlayer())) {
-            interactingNpc = npc;
-        }
-    }
-
-    private void addHydra(final NPC npc) {
-        final int npcIndex = npc.getIndex();
-
-        if (!hydras.containsKey(npcIndex)) {
-            hydras.put(npcIndex, new Hydra(npc));
-        }
-    }
-
-    private void removeHydra(final NPC npc) {
-        final int npcIndex = npc.getIndex();
-
-        hydras.remove(npcIndex);
-
-        if (Objects.equals(interactingNpc, npc)) {
-            interactingNpc = null;
-        }
-    }
-
-    private void resetHydras() {
-        hydras.clear();
-        interactingNpc = null;
+    private boolean isInHydraRegion() {
+        return client.isInInstancedRegion() && Arrays.equals(client.getMapRegions(), HYDRA_REGIONS);
     }
 
     public void activatePrayer(Prayer prayer) {
@@ -220,7 +183,6 @@ public class HydraAutoPrayerPlugin extends Plugin {
         if (widgetInfo == null) {
             return;
         }
-
         Widget prayer_widget = client.getWidget(widgetInfo);
 
         if (prayer_widget == null) {
