@@ -4,10 +4,13 @@ import net.runelite.api.ItemID;
 import net.runelite.api.ObjectID;
 
 public enum CHMode {
-
+    CRUDE_WOODEN_CHAIR("Crude Wooden Chair", ItemID.PLANK, ObjectID.CHAIR_6752, ObjectID.CHAIR_SPACE_4516, 2, CHWidget.CRUDE_WOODEN_CHAIR, ItemID.STEEL_NAILS),
+    WOODEN_CHAIR("Wooden Chair", ItemID.PLANK, ObjectID.CHAIR_6753, ObjectID.CHAIR_SPACE, 3, CHWidget.WOODEN_CHAIR, ItemID.STEEL_NAILS),
+    OAK_TABLE("Oak Table", ItemID.OAK_PLANK, ObjectID.OAK_TABLE, ObjectID.TABLE_SPACE, 4, CHWidget.OAK_TABLE),
+    CARVED_OAK_TABLE("Carved Oak Table", ItemID.OAK_PLANK, ObjectID.OAK_TABLE_13295, ObjectID.TABLE_SPACE, 6, CHWidget.CARVED_OAK_TABLE),
     OAK_LARDERS("Oak Larder", ItemID.OAK_PLANK, ObjectID.LARDER_13566, ObjectID.LARDER_SPACE, 8, CHWidget.OAK_LARDER),
     MAHOGANY_TABLE("Mahogany Table", ItemID.MAHOGANY_PLANK, ObjectID.MAHOGANY_TABLE, ObjectID.TABLE_SPACE, 6, CHWidget.MAHOGANY_TABLE),
-    MYTHICAL_CAPE("Mythical Cape", ItemID.TEAK_PLANK, ObjectID.MYTHICAL_CAPE, ObjectID.GUILD_TROPHY_SPACE, 3, CHWidget.MYTHICAL_CAPE, ItemID.MYTHICAL_CAPE);
+    MYTHICAL_CAPE("Mythical Cape", ItemID.TEAK_PLANK, ObjectID.MYTHICAL_CAPE, ObjectID.GUILD_TROPHY_SPACE, 3, CHWidget.MYTHICAL_CAPE, ItemID.MYTHICAL_CAPE_22114);
 
     private final String name;
     private final int plankId;

@@ -36,16 +36,16 @@ public class ConstructionHelperPlugin extends Plugin {
     static List<Class<?>> taskClassList = new ArrayList<>();
 
     static {
+        taskClassList.add(StopConditionTask.class);
+        taskClassList.add(ToggleRunTask.class);
         taskClassList.add(RemoveDialogueTask.class);
-        taskClassList.add(CraftOakLarderTask.class);
-        taskClassList.add(RemoveLarderTask.class);
-        taskClassList.add(BuildLarderTask.class);
+        taskClassList.add(CraftObjectTask.class);
+        taskClassList.add(RemoveObjectTask.class);
+        taskClassList.add(BuildObjectTask.class);
         taskClassList.add(LeavePOHTask.class);
         taskClassList.add(UsePlankOnPhialsTask.class);
         taskClassList.add(EnterPOHTask.class);
         taskClassList.add(PhialsDialogueTask.class);
-
-        taskClassList.add(StopConditionTask.class);
     }
 
     @Inject
@@ -94,7 +94,6 @@ public class ConstructionHelperPlugin extends Plugin {
         overlayManager.remove(overlay);
         tasks.clear();
     }
-
 
 
     @Subscribe

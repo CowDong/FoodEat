@@ -9,8 +9,8 @@ import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
 import net.runelite.client.plugins.constructionhelper.Task;
 
-public class CraftOakLarderTask extends Task {
-    public CraftOakLarderTask(ConstructionHelperPlugin plugin, Client client, ClientThread clientThread, ConstructionHelperConfig config) {
+public class CraftObjectTask extends Task {
+    public CraftObjectTask(ConstructionHelperPlugin plugin, Client client, ClientThread clientThread, ConstructionHelperConfig config) {
         super(plugin, client, clientThread, config);
     }
 

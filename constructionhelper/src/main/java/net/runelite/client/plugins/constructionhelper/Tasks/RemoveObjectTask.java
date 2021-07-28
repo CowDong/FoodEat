@@ -8,8 +8,8 @@ import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
 import net.runelite.client.plugins.constructionhelper.Task;
 
-public class RemoveLarderTask extends Task {
-    public RemoveLarderTask(ConstructionHelperPlugin plugin, Client client, ClientThread clientThread, ConstructionHelperConfig config) {
+public class RemoveObjectTask extends Task {
+    public RemoveObjectTask(ConstructionHelperPlugin plugin, Client client, ClientThread clientThread, ConstructionHelperConfig config) {
         super(plugin, client, clientThread, config);
     }
 
