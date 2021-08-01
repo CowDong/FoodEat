@@ -107,6 +107,13 @@ public class ContinueClickerPlugin extends Plugin {
             return widget;
         }
 
+        //?
+        widget = client.getWidget(217, 4);
+
+        if (widget != null && !widget.isHidden()) {
+            return widget;
+        }
+
         widget = client.getWidget(WidgetInfo.DIALOG2_SPRITE_CONTINUE);
 
         if (widget != null && !widget.isHidden()) {
