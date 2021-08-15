@@ -1,4 +1,4 @@
-version = "1.0.2"
+version = "1.0.3"
 
 project.extra["PluginName"] = "Nightmare Auto Prayer"
 project.extra["PluginDescription"] = "Automatically swap prayers in Nightmare of Ashihama"

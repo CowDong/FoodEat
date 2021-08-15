@@ -1,37 +1,23 @@
 package net.runelite.client.plugins.nightmarehelper;
 
 import com.google.inject.Provides;
-
-import java.awt.Dimension;
-import java.awt.event.MouseEvent;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Actor;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.MenuAction;
-import net.runelite.api.NPC;
-import net.runelite.api.NpcID;
-import net.runelite.api.Point;
-import net.runelite.api.Prayer;
-import net.runelite.api.Skill;
+import net.runelite.api.*;
 import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.NpcChanged;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.PluginManager;
 import org.pf4j.Extension;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Extension
 @PluginDescriptor(
@@ -44,6 +30,11 @@ import org.pf4j.Extension;
 @Slf4j
 @Singleton
 public class NightmareHelperPlugin extends Plugin {
+
+    public static final int NIGHTMARE_MELEE_ATTACK = 8594;
+    public static final int NIGHTMARE_RANGE_ATTACK = 8596;
+    public static final int NIGHTMARE_MAGIC_ATTACK = 8595;
+
     @Inject
     private Client client;
 
@@ -58,12 +49,6 @@ public class NightmareHelperPlugin extends Plugin {
 
     private boolean inFight;
     private boolean cursed;
-    private int attacksSinceCurse;
-
-    private int timeout;
-    private boolean swapMage;
-    private boolean swapRange;
-    private boolean swapMelee;
     private Prayer prayerToClick;
 
     public NightmareHelperPlugin() {
@@ -89,11 +74,6 @@ public class NightmareHelperPlugin extends Plugin {
         inFight = false;
         nm = null;
         cursed = false;
-        attacksSinceCurse = 0;
-        swapMage = false;
-        swapRange = false;
-        swapMelee = false;
-        timeout = 0;
         prayerToClick = null;
     }
 
@@ -107,75 +87,37 @@ public class NightmareHelperPlugin extends Plugin {
         NPC npc = (NPC) actor;
 
         //this will trigger once when the fight begins
-        if (npc.getId() == NpcID.THE_NIGHTMARE_9432) {
+        if (nm == null && npc.getName() != null && (npc.getName().equalsIgnoreCase("The Nightmare") || npc.getName().equalsIgnoreCase("Phosani's Nightmare"))) {
             //reset everything
             reset();
             nm = npc;
             inFight = true;
         }
 
-        if (!inFight || nm == null) {
+        if (!inFight || !npc.equals(nm)) {
             return;
         }
 
         int animationId = npc.getAnimation();
 
         switch (animationId) {
-            case NightmareAttackAnimations.NIGHTMARE_MAGIC_ATTACK:
-                attacksSinceCurse++;
-                timeout = config.ticksSleepRangeMage();
-                if (cursed) {
-                    swapMelee = true;
-                } else {
-                    swapMage = true;
-                }
+            case NIGHTMARE_MAGIC_ATTACK:
+                activatePrayer(cursed ?
+                        Prayer.PROTECT_FROM_MELEE :
+                        Prayer.PROTECT_FROM_MAGIC);
                 break;
-            case NightmareAttackAnimations.NIGHTMARE_MELEE_ATTACK:
-                attacksSinceCurse++;
-                timeout = config.ticksSleepMelee();
-                if (cursed) {
-                    swapRange = true;
-                } else {
-                    swapMelee = true;
-                }
+            case NIGHTMARE_MELEE_ATTACK:
+                activatePrayer(cursed ?
+                        Prayer.PROTECT_FROM_MISSILES :
+                        Prayer.PROTECT_FROM_MELEE);
                 break;
-            case NightmareAttackAnimations.NIGHTMARE_RANGE_ATTACK:
-                attacksSinceCurse++;
-                timeout = config.ticksSleepRangeMage();
-                if (cursed) {
-                    swapMage = true;
-                } else {
-                    swapRange = true;
-                }
-                break;
-            case NightmareAttackAnimations.NIGHTMARE_CURSE:
-                cursed = true;
-                attacksSinceCurse = 0;
+            case NIGHTMARE_RANGE_ATTACK:
+                activatePrayer(cursed ?
+                        Prayer.PROTECT_FROM_MAGIC :
+                        Prayer.PROTECT_FROM_MISSILES);
                 break;
             default:
                 break;
-        }
-
-        if (cursed && attacksSinceCurse == 5) {
-            //curse is removed when she phases, or does 5 attacks
-            cursed = false;
-            attacksSinceCurse = -1;
-        }
-    }
-
-    @Subscribe
-    public void onNpcChanged(NpcChanged event) {
-        //log.info("NpcChanged event triggered." + event.getNpc().getId());
-        final NPC npc = event.getNpc();
-
-        if (npc == null) {
-            return;
-        }
-
-        //if ID changes to 9431 (3rd phase) and is cursed, remove the curse
-        if (cursed && npc.getId() == NpcID.THE_NIGHTMARE_9431) {
-            cursed = false;
-            attacksSinceCurse = -1;
         }
     }
 
@@ -190,29 +132,34 @@ public class NightmareHelperPlugin extends Plugin {
     }
 
     @Subscribe
+    private void onChatMessage(ChatMessage event) {
+        if (!inFight || nm == null || event.getType() != ChatMessageType.GAMEMESSAGE) {
+            return;
+        }
+
+        if (event.getMessage().toLowerCase().contains("the nightmare has cursed you, shuffling your prayers!")) {
+            cursed = true;
+        }
+
+        if (event.getMessage().toLowerCase().contains("you feel the effects of the nightmare's curse wear off.")) {
+            cursed = false;
+        }
+    }
+
+    @Subscribe
     private void onGameTick(final GameTick event) {
         if (!inFight || nm == null) {
             return;
         }
 
-        //if nightmare's id is 9433, the fight has ended and everything should be reset
-        if (nm.getId() == NpcID.THE_NIGHTMARE_9433) {
+        //the fight has ended and everything should be reset
+        if (nm.getId() == NpcID.THE_NIGHTMARE || nm.getId() == NpcID.PHOSANIS_NIGHTMARE) {
             reset();
         }
-        if (swapMage && timeout == 0) {
-            activatePrayer(Prayer.PROTECT_FROM_MAGIC);
-            swapMage = false;
-        } else if (swapRange && timeout == 0) {
-            activatePrayer(Prayer.PROTECT_FROM_MISSILES);
-            swapRange = false;
-        } else if (config.swapNightmareMelee() && swapMelee && timeout == 0) {
-            activatePrayer(Prayer.PROTECT_FROM_MELEE);
-            swapMelee = false;
-        }
 
-        if (timeout != 0) {
-            timeout--;
-        }
+        /*if (!client.isPrayerActive(prayerToClick)) {
+            activatePrayer(prayerToClick);
+        }*/
     }
 
     public void activatePrayer(Prayer prayer) {
@@ -237,5 +184,7 @@ public class NightmareHelperPlugin extends Plugin {
                         MenuAction.CC_OP.getId(),
                         prayer_widget.getItemId(),
                         prayer_widget.getId()));
+
+        prayerToClick = prayer;
     }
 }
