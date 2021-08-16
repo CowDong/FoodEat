@@ -1,5 +1,5 @@
 object ProjectVersions {
-    const val rlVersion = "4.9.9"
+    const val rlVersion = "4.9.10"
     const val apiVersion = "^1.0.0"
 }
 
