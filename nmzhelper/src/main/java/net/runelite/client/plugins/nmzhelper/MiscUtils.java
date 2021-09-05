@@ -23,7 +23,14 @@ public class MiscUtils {
         return new MenuEntry("Drink", "<col=ff9040>" + itemName, itemId, MenuAction.ITEM_FIRST_OPTION.getId(), itemIndex, WidgetInfo.INVENTORY.getId(), false);
     }
 
-    public static boolean isDreamCreated(Client client) {
-        return client.getVarbitValue(3946) == 123;
+    public static DreamType getDreamType(Client client) {
+        int varbitValue = client.getVarbitValue(3946);
+        return DreamType.fromId(varbitValue);
     }
+
+    public static boolean isDreamCreated(Client client) {
+        // Only supports Customizable Rumble Hard as it's the most optimal dream no matter the level of your character.
+        return getDreamType(client) == DreamType.CUSTOMISABLE_RUMBLE_HARD;
+    }
+
 }

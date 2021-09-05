@@ -202,6 +202,11 @@ public class NMZHelperPlugin extends Plugin {
             return;
         }
 
+        if (MiscUtils.getDreamType(client).equals(DreamType.OTHER)) {
+            stopPlugin("Customisable Rumble Hard is the only dream supported.");
+            return;
+        }
+
         Task task = tasks.getValidTask();
 
         if (task != null) {
