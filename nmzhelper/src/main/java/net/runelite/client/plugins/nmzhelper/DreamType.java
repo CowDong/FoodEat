@@ -6,13 +6,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum DreamType {
-    OTHER(-1),
+    NOT_SUPPORTED(-1),
     NOT_DREAMING(0),
-    ENDURANCE_EASY(124),
-    ENDURANCE_HARD(125),
-    RUMBLE_EASY(126),
-    RUMBLE_HARD(127),
-    CUSTOMISABLE_RUMBLE_EASY(61),
     CUSTOMISABLE_RUMBLE_HARD(123);
 
     private static final Map<Integer, DreamType> lookup = Stream.of(DreamType.values()).collect(Collectors.toMap(DreamType::getId, Function.identity()));
@@ -28,9 +23,6 @@ public enum DreamType {
 
     public static DreamType fromId(int id) {
         DreamType dreamType = lookup.get(id);
-        if (id > 0 && dreamType == null) {
-            return OTHER;
-        }
-        return dreamType;
+        return dreamType == null ? NOT_SUPPORTED : dreamType;
     }
 }

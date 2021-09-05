@@ -29,8 +29,8 @@ public class MiscUtils {
     }
 
     public static boolean isDreamCreated(Client client) {
-        // Only supports Customizable Rumble Hard as it's the most optimal dream no matter the level of your character.
-        return getDreamType(client) == DreamType.CUSTOMISABLE_RUMBLE_HARD;
+        DreamType dreamType = getDreamType(client);
+        return !dreamType.equals(DreamType.NOT_SUPPORTED) && !dreamType.equals(DreamType.NOT_DREAMING);
     }
 
 }

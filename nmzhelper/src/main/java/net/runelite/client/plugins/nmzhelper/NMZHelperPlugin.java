@@ -30,8 +30,6 @@ import javax.inject.Singleton;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Executors;
 
 @Singleton
 @Extension
@@ -202,8 +200,9 @@ public class NMZHelperPlugin extends Plugin {
             return;
         }
 
-        if (MiscUtils.getDreamType(client).equals(DreamType.OTHER)) {
-            stopPlugin("Customisable Rumble Hard is the only dream supported.");
+        // If the player already has a dream created that isn't supported.
+        if (MiscUtils.getDreamType(client).equals(DreamType.NOT_SUPPORTED)) {
+            stopPlugin("The created dream is not supported.");
             return;
         }
 
