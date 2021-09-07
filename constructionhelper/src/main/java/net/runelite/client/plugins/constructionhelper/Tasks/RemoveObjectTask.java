@@ -6,6 +6,7 @@ import net.runelite.api.queries.GameObjectQuery;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
+import net.runelite.client.plugins.constructionhelper.MiscUtils;
 import net.runelite.client.plugins.constructionhelper.Task;
 
 public class RemoveObjectTask extends Task {
@@ -20,6 +21,11 @@ public class RemoveObjectTask extends Task {
 
     @Override
     public boolean validate() {
+        //if inside house
+        if (!MiscUtils.isInPOH(client)) {
+            return false;
+        }
+
         QueryResults<GameObject> gameObjects = new GameObjectQuery()
                 .idEquals(config.mode().getObjectId())
                 .result(client);

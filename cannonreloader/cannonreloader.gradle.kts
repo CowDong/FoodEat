@@ -1,4 +1,4 @@
-version = "1.0.1"
+version = "1.0.2"
 
 project.extra["PluginName"] = "Cannon Reloader"
 project.extra["PluginDescription"] = "Automatically reload your cannon"

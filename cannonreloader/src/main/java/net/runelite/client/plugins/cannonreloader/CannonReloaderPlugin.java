@@ -3,6 +3,7 @@ package net.runelite.client.plugins.cannonreloader;
 import com.google.inject.Provides;
 
 import java.awt.Dimension;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -212,6 +213,12 @@ public class CannonReloaderPlugin extends Plugin {
     public void onGameTick(GameTick event) {
         skipProjectileCheckThisTick = false;
 
+        if (getIdleTicks()) {
+            pressKey();
+            client.setKeyboardIdleTicks(0);
+            client.setMouseIdleTicks(0);
+        }
+
         if (tickDelay > 0) {
             tickDelay--;
             return;
@@ -235,5 +242,24 @@ public class CannonReloaderPlugin extends Plugin {
         tickDelay = 3;
 
         nextReloadCount = r.nextInt(config.maxReloadAmount() - config.minReloadAmount()) + config.minReloadAmount();
+    }
+
+    private void pressKey() {
+        int key = client.getTickCount() % 2 == 1 ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT;
+
+        KeyEvent keyPress = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
+        this.client.getCanvas().dispatchEvent(keyPress);
+        KeyEvent keyRelease = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
+        this.client.getCanvas().dispatchEvent(keyRelease);
+    }
+
+    private boolean getIdleTicks() {
+        int idleClientTicks = client.getKeyboardIdleTicks();
+
+        if (client.getMouseIdleTicks() > idleClientTicks) {
+            idleClientTicks = client.getMouseIdleTicks();
+        }
+
+        return idleClientTicks > 12500;
     }
 }

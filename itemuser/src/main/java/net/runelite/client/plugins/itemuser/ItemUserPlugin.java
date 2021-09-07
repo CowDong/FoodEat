@@ -9,6 +9,7 @@ import net.runelite.api.queries.InventoryWidgetItemQuery;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -129,7 +130,7 @@ public class ItemUserPlugin extends Plugin {
 
     @Subscribe
     public void onConfigButtonClicked(ConfigButtonClicked event) {
-        if (!event.getGroup().equals("itemuser")) {
+        if (!event.getGroup().equals(ItemUserConfig.class.getAnnotation(ConfigGroup.class).value())) {
             return;
         }
 

@@ -23,11 +23,11 @@ import java.util.Arrays;
 @Singleton
 @Extension
 @PluginDescriptor(
-        name = "Hydra Auto Prayer",
+        name = "Hydra Auto Prayer (unfinished)",
         enabledByDefault = false,
         description = "Swaps prayer for hydra",
         tags = {"hydra", "helper", "baby", "small", "normal", "regular", "auto", "prayer", "swapper", "ben93riggs"},
-        hidden = true
+        hidden = false
 )
 public class HydraAutoPrayerPlugin extends Plugin {
     private static final int[] HYDRA_REGIONS = {5279, 5280, 5535, 5536};

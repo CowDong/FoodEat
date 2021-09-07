@@ -8,6 +8,7 @@ import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
+import net.runelite.client.plugins.constructionhelper.MiscUtils;
 import net.runelite.client.plugins.constructionhelper.Task;
 
 import java.util.Arrays;
@@ -25,6 +26,11 @@ public class PhialsDialogueTask extends Task {
 
     @Override
     public boolean validate() {
+        //if inside house
+        if (MiscUtils.isInPOH(client)) {
+            return false;
+        }
+
         QueryResults<NPC> results = new NPCQuery()
                 .idEquals(NpcID.PHIALS)
                 .result(client);

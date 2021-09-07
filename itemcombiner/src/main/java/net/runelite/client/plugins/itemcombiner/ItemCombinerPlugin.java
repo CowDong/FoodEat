@@ -12,6 +12,7 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -135,7 +136,7 @@ public class ItemCombinerPlugin extends Plugin {
 
     @Subscribe
     public void onConfigButtonClicked(ConfigButtonClicked event) {
-        if (!event.getGroup().equals("itemcombiner")) {
+        if (!event.getGroup().equals(ItemCombinerConfig.class.getAnnotation(ConfigGroup.class).value())) {
             return;
         }
 

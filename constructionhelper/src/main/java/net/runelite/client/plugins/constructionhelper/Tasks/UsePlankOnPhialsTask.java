@@ -12,6 +12,7 @@ import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
+import net.runelite.client.plugins.constructionhelper.MiscUtils;
 import net.runelite.client.plugins.constructionhelper.Task;
 
 import java.util.Arrays;
@@ -27,12 +28,10 @@ public class UsePlankOnPhialsTask extends Task {
         return 4;
     }
 
-    List<Integer> regions = Arrays.asList(7513, 7514, 7769, 7770);
-
     @Override
     public boolean validate() {
         //if inside house
-        if (Arrays.stream(client.getMapRegions()).anyMatch(r -> regions.contains(r))) {
+        if (MiscUtils.isInPOH(client)) {
             return false;
         }
 
@@ -50,7 +49,7 @@ public class UsePlankOnPhialsTask extends Task {
             return false;
         }
 
-        if (inventoryWidget.getWidgetItems().stream().filter(item -> item.getId() == config.mode().getPlankId()).count() > config.mode().getPlankCost()) {
+        if (inventoryWidget.getWidgetItems().stream().filter(item -> item.getId() == config.mode().getPlankId()).count() >= config.mode().getPlankCost()) {
             return false;
         }
 

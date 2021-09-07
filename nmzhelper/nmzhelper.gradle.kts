@@ -1,4 +1,4 @@
-version = "1.0.7"
+version = "1.0.8"
 
 project.extra["PluginName"] = "NMZ Helper"
 project.extra["PluginDescription"] = "An automation utility for NMZ"

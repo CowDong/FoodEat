@@ -33,7 +33,7 @@ public class ToggleRunTask extends Task {
             return false;
         }
 
-        if (client.getEnergy() <= nextRunEnergy && client.getVar(Varbits.RUN_SLOWED_DEPLETION_ACTIVE) == 0) {
+        if (client.getEnergy() <= nextRunEnergy) {
             return false;
         }
 
@@ -44,7 +44,7 @@ public class ToggleRunTask extends Task {
     public void onGameTick(GameTick event) {
         boolean runEnabled = client.getVarpValue(173) == 1;
 
-        if (client.getEnergy() > nextRunEnergy || client.getVar(Varbits.RUN_SLOWED_DEPLETION_ACTIVE) != 0) {
+        if (client.getEnergy() > nextRunEnergy) {
             if (!runEnabled) {
                 nextRunEnergy = getRandomIntBetweenRange(20, 100);
                 Widget runOrb = client.getWidget(WidgetInfo.MINIMAP_RUN_ORB);
@@ -56,7 +56,7 @@ public class ToggleRunTask extends Task {
                                     1,
                                     MenuAction.CC_OP.getId(),
                                     -1,
-                                    runOrb.getId() + 1 //first child of the minimap orb
+                                    WidgetInfo.MINIMAP_TOGGLE_RUN_ORB.getId()
                             )
                     );
                 }

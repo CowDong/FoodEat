@@ -8,6 +8,7 @@ import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
+import net.runelite.client.plugins.constructionhelper.MiscUtils;
 import net.runelite.client.plugins.constructionhelper.Task;
 
 public class BuildObjectTask extends Task {
@@ -22,6 +23,11 @@ public class BuildObjectTask extends Task {
 
     @Override
     public boolean validate() {
+        //if inside house
+        if (!MiscUtils.isInPOH(client)) {
+            return false;
+        }
+
         Widget inventoryWidget = client.getWidget(WidgetInfo.INVENTORY);
 
         if (inventoryWidget == null) {

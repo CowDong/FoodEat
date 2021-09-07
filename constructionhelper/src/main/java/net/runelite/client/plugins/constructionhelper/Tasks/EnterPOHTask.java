@@ -8,6 +8,7 @@ import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
+import net.runelite.client.plugins.constructionhelper.MiscUtils;
 import net.runelite.client.plugins.constructionhelper.Task;
 
 import java.util.Arrays;
@@ -23,13 +24,10 @@ public class EnterPOHTask extends Task {
         return 3;
     }
 
-    List<Integer> regions = Arrays.asList(7513, 7514, 7769, 7770);
-
     @Override
     public boolean validate() {
-
         //if inside house
-        if (Arrays.stream(client.getMapRegions()).anyMatch(r -> regions.contains(r))) {
+        if (MiscUtils.isInPOH(client)) {
             return false;
         }
 

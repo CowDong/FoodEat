@@ -8,6 +8,7 @@ import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperConfig;
 import net.runelite.client.plugins.constructionhelper.ConstructionHelperPlugin;
+import net.runelite.client.plugins.constructionhelper.MiscUtils;
 import net.runelite.client.plugins.constructionhelper.Task;
 
 import java.util.Arrays;
@@ -24,6 +25,11 @@ public class RemoveDialogueTask extends Task {
 
     @Override
     public boolean validate() {
+        //if inside house
+        if (!MiscUtils.isInPOH(client)) {
+            return false;
+        }
+
         // check for remove option dialogue
         Widget remove_dialogue_widget = client.getWidget(WidgetInfo.DIALOG_OPTION_OPTIONS);
 

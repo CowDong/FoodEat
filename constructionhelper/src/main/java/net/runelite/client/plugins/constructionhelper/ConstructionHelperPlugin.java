@@ -11,6 +11,7 @@ import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
+import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -36,6 +37,8 @@ public class ConstructionHelperPlugin extends Plugin {
     static List<Class<?>> taskClassList = new ArrayList<>();
 
     static {
+        taskClassList.add(ResetIdleTask.class);
+        taskClassList.add(BreakTask.class);
         taskClassList.add(StopConditionTask.class);
         taskClassList.add(ToggleRunTask.class);
         taskClassList.add(RemoveDialogueTask.class);
@@ -66,6 +69,9 @@ public class ConstructionHelperPlugin extends Plugin {
     @Inject
     private ChatMessageManager chatMessageManager;
 
+    @Inject
+    public ReflectBreakHandler chinBreakHandler;
+
     boolean pluginStarted = false;
 
     @Provides
@@ -82,6 +88,7 @@ public class ConstructionHelperPlugin extends Plugin {
     @Override
     protected void startUp() throws Exception {
         pluginStarted = false;
+        chinBreakHandler.registerPlugin(this);
         status = "initializing...";
         overlayManager.add(overlay);
         tasks.clear();
@@ -91,6 +98,7 @@ public class ConstructionHelperPlugin extends Plugin {
     @Override
     protected void shutDown() throws Exception {
         pluginStarted = false;
+        chinBreakHandler.unregisterPlugin(this);
         overlayManager.remove(overlay);
         tasks.clear();
     }
@@ -98,20 +106,26 @@ public class ConstructionHelperPlugin extends Plugin {
 
     @Subscribe
     public void onConfigButtonClicked(ConfigButtonClicked event) {
-        if (!event.getGroup().equals("constructionhelper")) {
+        if (!event.getGroup().equals(ConstructionHelperConfig.class.getAnnotation(ConfigGroup.class).value())) {
             return;
         }
 
         if (event.getKey().equals("startButton")) {
             pluginStarted = true;
+            chinBreakHandler.startPlugin(this);
         } else if (event.getKey().equals("stopButton")) {
             pluginStarted = false;
+            chinBreakHandler.stopPlugin(this);
         }
     }
 
     @Subscribe
     public void onGameTick(GameTick event) {
         if (!pluginStarted) {
+            return;
+        }
+
+        if (chinBreakHandler.isBreakActive(this)) {
             return;
         }
 
@@ -155,6 +169,7 @@ public class ConstructionHelperPlugin extends Plugin {
 
     public void stopPlugin(String reason) {
         pluginStarted = false;
+        chinBreakHandler.stopPlugin(this);
 
         if (reason != null && !reason.isEmpty())
             sendGameMessage("ConstructionHelper Stopped: " + reason);

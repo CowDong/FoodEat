@@ -17,6 +17,7 @@ import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
+import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -27,11 +28,8 @@ import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Executors;
 
 @Singleton
 @Extension
@@ -51,6 +49,9 @@ public class NMZHelperPlugin extends Plugin {
     static List<Class<?>> taskClassList = new ArrayList<>();
 
     static {
+        taskClassList.add(BreakTask.class);
+        taskClassList.add(ResetIdleTask.class);
+
         taskClassList.add(SpecialAttackTask.class);
         taskClassList.add(OverloadTask.class);
         taskClassList.add(AbsorptionTask.class);
@@ -97,6 +98,9 @@ public class NMZHelperPlugin extends Plugin {
     @Inject
     private ChatMessageManager chatMessageManager;
 
+    @Inject
+    public ReflectBreakHandler chinBreakHandler;
+
     boolean pluginStarted;
 
     @Provides
@@ -113,6 +117,7 @@ public class NMZHelperPlugin extends Plugin {
     @Override
     protected void startUp() {
         pluginStarted = false;
+        chinBreakHandler.registerPlugin(this);
         overlayManager.add(overlay);
         status = "initializing...";
         tasks.clear();
@@ -122,20 +127,23 @@ public class NMZHelperPlugin extends Plugin {
     @Override
     protected void shutDown() {
         pluginStarted = false;
+        chinBreakHandler.unregisterPlugin(this);
         overlayManager.remove(overlay);
         tasks.clear();
     }
 
     @Subscribe
     public void onConfigButtonClicked(ConfigButtonClicked event) {
-        if (!event.getGroup().equals("nmzhelper")) {
+        if (!event.getGroup().equals(NMZHelperConfig.class.getAnnotation(ConfigGroup.class).value())) {
             return;
         }
 
         if (event.getKey().equals("startButton")) {
             pluginStarted = true;
+            chinBreakHandler.startPlugin(this);
         } else if (event.getKey().equals("stopButton")) {
             pluginStarted = false;
+            chinBreakHandler.stopPlugin(this);
         }
     }
 
@@ -169,18 +177,12 @@ public class NMZHelperPlugin extends Plugin {
 
     @Subscribe
     public void onGameTick(GameTick event) {
-        if (!pluginStarted) {
+        if (!pluginStarted || chinBreakHandler.isBreakActive(this)) {
             return;
         }
 
         if (client.getGameState() != GameState.LOGGED_IN) {
             return;
-        }
-
-        if (getIdleTicks()) {
-            pressKey();
-            client.setKeyboardIdleTicks(0);
-            client.setMouseIdleTicks(0);
         }
 
         //if we don't have a rock cake, return...may need to stop the plugin but this is causing it to stop
@@ -212,7 +214,7 @@ public class NMZHelperPlugin extends Plugin {
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event) {
-        if (!pluginStarted)
+        if (!pluginStarted || chinBreakHandler.isBreakActive(this))
             return;
 
         if (!config.autoRelog())
@@ -244,27 +246,9 @@ public class NMZHelperPlugin extends Plugin {
 
     public void stopPlugin(String reason) {
         pluginStarted = false;
+        chinBreakHandler.stopPlugin(this);
 
         if (reason != null && !reason.isEmpty())
             sendGameMessage("NMZHelper Stopped: " + reason);
-    }
-
-    private boolean getIdleTicks() {
-        int idleClientTicks = client.getKeyboardIdleTicks();
-
-        if (client.getMouseIdleTicks() > idleClientTicks) {
-            idleClientTicks = client.getMouseIdleTicks();
-        }
-
-        return idleClientTicks > 12500;
-    }
-
-    private void pressKey() {
-        int key = client.getTickCount() % 2 == 1 ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT;
-
-        KeyEvent keyPress = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
-        this.client.getCanvas().dispatchEvent(keyPress);
-        KeyEvent keyRelease = new KeyEvent(this.client.getCanvas(), KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
-        this.client.getCanvas().dispatchEvent(keyRelease);
     }
 }
