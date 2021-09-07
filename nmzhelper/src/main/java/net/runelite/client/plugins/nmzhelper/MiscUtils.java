@@ -23,7 +23,14 @@ public class MiscUtils {
         return new MenuEntry("Drink", "<col=ff9040>" + itemName, itemId, MenuAction.ITEM_FIRST_OPTION.getId(), itemIndex, WidgetInfo.INVENTORY.getId(), false);
     }
 
-    public static boolean isDreamCreated(Client client) {
-        return client.getVarbitValue(3946) == 123;
+    public static DreamType getDreamType(Client client) {
+        int varbitValue = client.getVarbitValue(3946);
+        return DreamType.fromId(varbitValue);
     }
+
+    public static boolean isDreamCreated(Client client) {
+        DreamType dreamType = getDreamType(client);
+        return !dreamType.equals(DreamType.NOT_SUPPORTED) && !dreamType.equals(DreamType.NOT_DREAMING);
+    }
+
 }

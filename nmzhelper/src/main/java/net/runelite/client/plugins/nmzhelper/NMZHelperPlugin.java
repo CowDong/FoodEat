@@ -204,6 +204,12 @@ public class NMZHelperPlugin extends Plugin {
             return;
         }
 
+        // If the player already has a dream created that isn't supported.
+        if (MiscUtils.getDreamType(client).equals(DreamType.NOT_SUPPORTED)) {
+            stopPlugin("The created dream is not supported.");
+            return;
+        }
+
         Task task = tasks.getValidTask();
 
         if (task != null) {
